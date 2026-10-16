@@ -1,0 +1,200 @@
+{
+  "schemaVersion": "1.0",
+  "mode": "synthetic_frontend_demo",
+  "disclaimer": "所有运行数据、预测、告警、工单与规则均为合成演示；公开资料仅校核物理量及设备等级，非实测、非厂家认证。",
+  "sourceDocument": "docs/data-sources.md",
+  "assets": [
+    {
+      "id": "UPS-A01",
+      "model": "HC-UPS40（虚构）",
+      "type": "ups",
+      "reference": "S01",
+      "rated": {
+        "apparentPowerKVA": 40,
+        "activePowerKW": 40,
+        "lineVoltageV": 400,
+        "frequencyHz": 50
+      },
+      "sample": {
+        "loadPercent": 62,
+        "outputActivePowerKW": 24.8,
+        "loadPowerFactor": 0.98,
+        "averagePhaseCurrentA": 36.5,
+        "internalTemperatureC": 34,
+        "quality": "good"
+      }
+    },
+    {
+      "id": "BAT-A01",
+      "model": "HC-BAT100（虚构）",
+      "type": "battery",
+      "reference": "S02",
+      "rated": {
+        "blocksInSeries": 32,
+        "blockNominalVoltageV": 12,
+        "nominalCapacityAh": 100,
+        "bankNominalVoltageV": 384
+      },
+      "sample": {
+        "temperatureC": 25,
+        "blockFloatVoltageV": 13.56,
+        "bankFloatVoltageV": 433.92,
+        "quality": "good"
+      },
+      "note": "容量和串数为演示假设；浮充参考考虑温度，不能由Ah直接估算真实后备时长"
+    },
+    {
+      "id": "PAC-A01",
+      "model": "HC-PAC30（虚构）",
+      "type": "cooling",
+      "reference": "S03",
+      "rated": {
+        "coolingCapacityKW": 30
+      },
+      "sample": {
+        "electricalPowerKW": 8.2,
+        "returnAirTemperatureC": 26.2,
+        "supplyAirTemperatureC": 18.5,
+        "humidityPercentRH": 46,
+        "fanSpeedPercent": 72,
+        "quality": "good"
+      }
+    },
+    {
+      "id": "DG-A01",
+      "model": "HC-DG200（虚构）",
+      "type": "generator",
+      "reference": "S04",
+      "rated": {
+        "primeActivePowerKW": 160,
+        "primeApparentPowerKVA": 200,
+        "frequencyHz": 50
+      },
+      "sample": {
+        "state": "standby_stopped",
+        "activePowerKW": 0,
+        "speedRPM": 0,
+        "measuredFrequencyHz": null,
+        "fuelPercent": 72,
+        "quality": "good"
+      },
+      "testRunSample": {
+        "state": "test_running",
+        "activePowerKW": 96,
+        "speedRPM": 1500,
+        "measuredFrequencyHz": 50,
+        "coolantTemperatureC": 78
+      }
+    },
+    {
+      "id": "PDU-A01",
+      "model": "HC-PDU63（虚构）",
+      "type": "distribution",
+      "reference": "S05",
+      "rated": {
+        "lineVoltageV": 400,
+        "currentA": 63
+      },
+      "sample": {
+        "phaseCurrentA": [
+          36,
+          37,
+          35
+        ],
+        "powerFactor": 0.98,
+        "activePowerKW": 24.4,
+        "energyKWh": 10243.7,
+        "quality": "good"
+      }
+    },
+    {
+      "id": "TH-A01",
+      "model": "HC-TH（虚构）",
+      "type": "environment",
+      "reference": "S05",
+      "sample": {
+        "temperatureC": 24.6,
+        "humidityPercentRH": 46,
+        "quality": "good"
+      }
+    },
+    {
+      "id": "LEAK-A01",
+      "model": "HC-LEAK（虚构）",
+      "type": "leak",
+      "reference": "S06",
+      "sample": {
+        "state": "dry",
+        "quality": "good"
+      },
+      "states": [
+        "dry",
+        "wet",
+        "unknown"
+      ]
+    }
+  ],
+  "demoRules": {
+    "label": "演示规则，需现场审核后才能用于生产",
+    "temperatureWarningC": 28,
+    "temperatureCriticalC": 32,
+    "temperatureRecoveryHysteresisC": 1,
+    "durationSeconds": 120
+  },
+  "scenarios": [
+    {
+      "id": "cooling_deterioration",
+      "title": "制冷效能下降风险",
+      "effects": {
+        "fanSpeedPercent": [
+          72,
+          45
+        ],
+        "returnAirTemperatureC": [
+          26.2,
+          30.8
+        ],
+        "upsInternalTemperatureC": [
+          34,
+          40.5
+        ]
+      },
+      "prediction": {
+        "label": "演示预测，非实测模型",
+        "horizonMinutes": 30,
+        "returnTemperatureC": 31.6,
+        "illustrativeRangeC": [
+          30.4,
+          32.8
+        ]
+      },
+      "action": "核查数据质量、风量和负载；不自动切换电源或调整设定值"
+    },
+    {
+      "id": "battery_deviation",
+      "title": "电池单块偏差",
+      "effects": {
+        "resistanceChangeFromOwnBaselinePercent": 25,
+        "temperatureAboveGroupMedianC": 4
+      },
+      "action": "人工复测与检查连接，不能单凭内阻确认故障"
+    },
+    {
+      "id": "water_detected",
+      "title": "点式漏水告警",
+      "effects": {
+        "state": "wet"
+      },
+      "action": "定位液体来源并依现场规程处置；不自动认定空调排水故障"
+    }
+  ],
+  "integrity": [
+    "P_kW = sqrt(3) * lineVoltageV * meanPhaseCurrentA * PF / 1000",
+    "energy delta for 5 minutes = averagePowerKW / 12",
+    "Missing measurements use null, never zero",
+    "Cooling thermal capacity is not electrical power",
+    "Do not add upstream and downstream meters twice",
+    "Prediction intervals are illustrative, not calibrated confidence intervals",
+    "No fabricated manufacturer manual clauses or production benchmark claims"
+  ]
+}

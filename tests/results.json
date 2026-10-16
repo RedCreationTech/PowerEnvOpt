@@ -1,0 +1,94 @@
+[
+  {
+    "name": "initial boot, no errors or network",
+    "status": "PASS"
+  },
+  {
+    "name": "exact mock counts and references",
+    "status": "PASS"
+  },
+  {
+    "name": "all 12 pages render and every site filter works",
+    "status": "PASS"
+  },
+  {
+    "name": "requirements all target/no false result",
+    "status": "PASS"
+  },
+  {
+    "name": "alarm cannot create work before acknowledgement",
+    "status": "PASS"
+  },
+  {
+    "name": "alarm confirmation reason required",
+    "status": "PASS"
+  },
+  {
+    "name": "work creation and duplicate protection",
+    "status": "PASS"
+  },
+  {
+    "name": "full work closure requires passed retest and distinct reviewer",
+    "status": "PASS"
+  },
+  {
+    "name": "work history renders user input as text",
+    "status": "PASS"
+  },
+  {
+    "name": "reopen updates original alarm",
+    "status": "PASS"
+  },
+  {
+    "name": "stale work version blocked",
+    "status": "PASS"
+  },
+  {
+    "name": "suppression expires after 3 ticks",
+    "status": "PASS"
+  },
+  {
+    "name": "assistant no-source and dangerous action refusal",
+    "status": "PASS"
+  },
+  {
+    "name": "model promotion and approval",
+    "status": "PASS"
+  },
+  {
+    "name": "CSV formula and quote injection guarded",
+    "status": "PASS"
+  },
+  {
+    "name": "exports available for applicable modules",
+    "status": "PASS"
+  },
+  {
+    "name": "local persisted state reload",
+    "status": "PASS"
+  },
+  {
+    "name": "reset requires explicit dialog then resets state",
+    "status": "PASS"
+  },
+  {
+    "name": "file URL fallback boots",
+    "status": "PASS"
+  },
+  {
+    "name": "storage denied fallback boots",
+    "status": "PASS"
+  },
+  {
+    "name": "invalid JSON fallback boots",
+    "status": "PASS"
+  },
+  {
+    "name": "invalid schema payload fallback boots",
+    "status": "PASS"
+  },
+  {
+    "name": "no uncaught errors or network throughout",
+    "status": "PASS"
+  }
+]

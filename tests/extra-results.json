@@ -1,0 +1,30 @@
+[
+  {
+    "name": "topology rejects self-link duplicate cycle and saves valid edge",
+    "status": "PASS"
+  },
+  {
+    "name": "search and clear and pagination",
+    "status": "PASS"
+  },
+  {
+    "name": "quality-invalid health suppresses curve and score",
+    "status": "PASS"
+  },
+  {
+    "name": "configuration validation no networking",
+    "status": "PASS"
+  },
+  {
+    "name": "alarm cannot be acknowledged without reason",
+    "status": "PASS"
+  },
+  {
+    "name": "quality note XSS escaped in audit",
+    "status": "PASS"
+  },
+  {
+    "name": "all extras no runtime errors",
+    "status": "PASS"
+  }
+]

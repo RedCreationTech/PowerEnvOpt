@@ -1,0 +1,5 @@
+const {load}=require('./harness.cjs');const fs=require('fs');const pages=['overview','assets','monitor','alarms','health','energy','assistant','work','quality','models','access','audit'];const results=[];
+for(const page of pages){let h=load();h.w.navigate(page);const buttons=[...h.w.document.querySelectorAll('#content button')].map((b,i)=>({i,label:b.textContent,onclick:b.getAttribute('onclick')}));h.close();for(const b of buttons){h=load();h.w.navigate(page);try{h.w.document.querySelectorAll('#content button')[b.i].click();results.push({page,label:b.label,errors:h.errors})}catch(e){results.push({page,label:b.label,errors:[e.message,...h.errors]})}h.close()}}
+console.log(JSON.stringify({count:results.length,failures:results.filter(r=>r.errors.length)},null,2));fs.writeFileSync(__dirname+'/button-results.json',JSON.stringify(results,null,2));
+
+process.exitCode=results.some(r=>r.errors.length)?1:0;

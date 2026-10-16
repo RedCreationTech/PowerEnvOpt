@@ -1,0 +1,44 @@
+{
+  "mode": "Mocked Node request/response, no listening socket; not live HTTP/browser proof",
+  "bind": {
+    "port": 4173,
+    "host": "127.0.0.1"
+  },
+  "results": [
+    {
+      "url": "/",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "/app.js",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "url": "/styles.css",
+      "method": "HEAD",
+      "status": 200
+    },
+    {
+      "url": "/nonexistent",
+      "method": "GET",
+      "status": 404
+    },
+    {
+      "url": "/",
+      "method": "POST",
+      "status": 405
+    },
+    {
+      "url": "/%ZZ",
+      "method": "GET",
+      "status": 400
+    },
+    {
+      "url": "/%2e%2e%2fQA_CHECKLIST.md",
+      "method": "GET",
+      "status": 403
+    }
+  ]
+}

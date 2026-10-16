@@ -1,0 +1,477 @@
+[
+  {
+    "page": "overview",
+    "label": "进入",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "进入",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "进入",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看数据质量 →",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "全部告警 →",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "UPS 温升持续偏高",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "电池组压差偏大",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "制冷效率偏离基线",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "配电负载接近阈值",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看预测证据 →",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "市电输入400 V / 50 Hz · 演示",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "配电母线供电关系 → UPS",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "柴油发电机冗余关系 · 备用电源",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "UPS 01HC-BJ-001正常",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "蓄电池组 01HC-BJ-002正常",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "精密空调 01HC-BJ-003正常",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "编辑演示关系",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "版本记录",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "设备档案",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "上一页",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "下一页",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "关联分组",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "UPS 温升持续偏高",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "电池组压差偏大",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "制冷效率偏离基线",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "配电负载接近阈值",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "遥测质量异常",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "启动电池电压偏低",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "UPS 温升持续偏高",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "查看证据",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "上一页",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "下一页",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "查看计算边界",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "查看知识依据",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "询问运维助手",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "关联告警",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "↓ 导出分析 CSV",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "UPS 温度偏高怎么排查？",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "空调能耗异常怎么分析？",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "数据缺失还能预测吗？",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "发送",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "建议有帮助",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "需要专家复核",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "查看",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "查看",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "查看",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "清空对话",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "上一页",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "下一页",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "记录复核",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "查看设备",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "记录复核",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "查看设备",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "记录复核",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "查看设备",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "查看模型卡",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "推进发布流程",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "回滚演示",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "查看模型卡",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "推进发布流程",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "回滚演示",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "查看模型卡",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "推进发布流程",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "回滚演示",
+    "errors": []
+  },
+  {
+    "page": "access",
+    "label": "保存本地配置",
+    "errors": []
+  },
+  {
+    "page": "access",
+    "label": "模拟连通性检查",
+    "errors": []
+  },
+  {
+    "page": "access",
+    "label": "↓ 下载演示点表 JSON",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "操作审计",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "需求指标映射",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "数据与本地存储",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "↓ 导出 JSON",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "上一页",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "下一页",
+    "errors": []
+  }
+]

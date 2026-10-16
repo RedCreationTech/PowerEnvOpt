@@ -1,0 +1,22 @@
+[
+  {
+    "name": "every valid temperature chart current point matches snapshot",
+    "status": "PASS"
+  },
+  {
+    "name": "forecast band represents both plus and minus 2 Celsius",
+    "status": "PASS"
+  },
+  {
+    "name": "energy curve matches selected site KPI",
+    "status": "PASS"
+  },
+  {
+    "name": "energy accumulation uses same power across one 5-minute step",
+    "status": "PASS"
+  },
+  {
+    "name": "offline asset all eight points unavailable; quality counts 278 + 10",
+    "status": "PASS"
+  }
+]
