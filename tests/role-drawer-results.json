@@ -1,0 +1,78 @@
+[
+  {
+    "name": "five role kinds, fixed identities, different home queues and exact menus",
+    "status": "PASS"
+  },
+  {
+    "name": "native asset and alarm tables and monitor are always visible without global wizard",
+    "status": "PASS"
+  },
+  {
+    "name": "asset/alarm/work open matching drawer without changing module context",
+    "status": "PASS"
+  },
+  {
+    "name": "drawer close preserves search, site and source focus",
+    "status": "PASS"
+  },
+  {
+    "name": "drawer has labelled tabs and keyboard arrow navigation",
+    "status": "PASS"
+  },
+  {
+    "name": "wrong role direct calls cannot bypass handoffs",
+    "status": "PASS"
+  },
+  {
+    "name": "only assigned engineer accepts executes submits and retests; actor IDs fixed",
+    "status": "PASS"
+  },
+  {
+    "name": "wrong roles cannot mutate legacy admin and model handlers",
+    "status": "PASS"
+  },
+  {
+    "name": "hidden ordinary alarm actions are gated by current role",
+    "status": "PASS"
+  },
+  {
+    "name": "failed retest and supervisor return require fresh complete checks",
+    "status": "PASS"
+  },
+  {
+    "name": "post-retest telemetry recovery is distinct from closure and knowledge publication",
+    "status": "PASS"
+  },
+  {
+    "name": "quality blocks analysis approval retest and review, fresh diagnosis required",
+    "status": "PASS"
+  },
+  {
+    "name": "XSS in decision retest and review notes remains text in every drawer tab",
+    "status": "PASS"
+  },
+  {
+    "name": "selected asset drawer context persists across reload",
+    "status": "PASS"
+  },
+  {
+    "name": "role queues transfer each task instead of duplicating prior owners",
+    "status": "PASS"
+  },
+  {
+    "name": "site filter applies to engineer assigned KPI as well as queue",
+    "status": "PASS"
+  },
+  {
+    "name": "old schema migration preserves ordinary non-linked records and resets linked chain",
+    "status": "PASS"
+  },
+  {
+    "name": "drawer after state-changing action returns focus to stable page heading",
+    "status": "PASS"
+  },
+  {
+    "name": "drawer keeps nondefault type filter and second-page list position",
+    "status": "PASS"
+  }
+]

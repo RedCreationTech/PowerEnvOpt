@@ -1,48 +1,57 @@
-# v2 linked workflow independent verification
+# v3 role-based operations: independent verification
 
-Verified 2026-10-17 Beijing time. Test target: app.js + workflows.js in this delivery. Pure frontend, synthetic data only.
+Verified 2026-10-17. Target: the delivered app.js, workflows.js, index.html and styles.css. This is a local, synthetic frontend demonstration.
 
 ## Result
 
 - 24 linked-journey acceptance groups passed.
-- Existing business/DOM checks: 23 passed; extra checks: 7 passed; chart/data consistency: 5 passed.
-- Initial-screen button smoke checks: 176 passed without uncaught runtime errors.
-- Static server request-handler checks: 7 passed. These use mocked Node requests/responses, not browser or live HTTP proof.
-- No tested application interaction called fetch, XMLHttpRequest or WebSocket.
+- 19 role, drawer and integration acceptance groups passed.
+- 35 retained business/DOM groups passed (23 main, 7 extra, 5 consistency).
+- 106 initial-page button smoke checks passed across role-visible pages.
+- 7 static-server request-handler checks passed using mocked Node requests/responses.
+- Tested app interactions made no fetch, XMLHttpRequest or WebSocket calls.
+- JavaScript syntax checks passed.
 
-Command: install test dependencies with `npm install --prefix tests`, then `npm test` from the project root. This verification reused an already-installed jsdom 30.1.3 through NODE_PATH; no runtime dependency is needed by the delivered app. Node v24.19.0 was used.
+Run `npm install --ignore-scripts --prefix tests`, then `npm test` from the project root. The review reused installed jsdom 30.1.3 through NODE_PATH on Node v24.19.0. The application itself has no runtime dependency. Machine-readable evidence is in tests/*-results.json and tests/results.json. All seven suites, including role-drawer.cjs, are included in npm test.
 
-Machine-readable outputs: tests/linked-results.json, results.json, extra-results.json, consistency-results.json, button-results.json and server-results.json. Root npm test includes the linked suite.
+## Independently exercised
 
-## What was independently exercised
+### Normal modules and contextual detail
 
-Each battery, cooling and capacity journey was completed from analysis through human decision, work order, checklist, retest, independent review and case. Tests verify the original asset/event/evidence/knowledge IDs, immutable diagnosis/decision references on work orders, retest links and displayed case provenance. Reload preserves completed state and selected scenario.
+Asset and alarm tables and the monitor remain rendered in their normal modules. No collapsed legacy explorer or global journey context takes over these pages. Linked asset, alarm and work entry points open the matching detail drawer without replacing the module. Search, site, nondefault asset type and second-page pagination survive opening and closing detail.
 
-Negative tests cover missing analysis, missing reason, unknown plan, defer/reject, duplicate work-order creation, incomplete checklist, premature retest/close, failed retest backflow, cleared checklist after failure, missing/identical reviewer, stale quality, fresh-analysis requirement after quality recovery, invalid IDs, corrupt saved journey and missing referenced work. Legacy work transitions cannot bypass the linked journey gates.
+DOM checks verify labelled dialog/tab/tabpanel structure, arrow-key tab navigation, focus on the close control, return to the original connected opener, and fallback to the stable page heading after an action rerenders the list. These checks explicitly simulate the dialog close event; they are not native browser keyboard acceptance.
 
-The rendered UI click path completes a battery journey using actual DOM button handlers and checkbox events. Entered HTML remains text. This is a jsdom interaction test, not a real browser click/visual test.
+### Roles, assignment and handler guards
 
-Aggregate cards are checked with all three cases closed, after one reset, and under a single-site filter. Reset clears work, diagnoses, decisions, tests and cases without clearing other journeys. Entire-demo reset removes all linked work and cases.
+Six fixed demo people represent five role kinds: operator, maintenance engineer (two people), supervisor, reliability analyst and administrator. Default identity is the operator. Each identity has its expected home and exact permitted navigation. Tasks transfer between role queues; a non-assigned engineer cannot accept, check, submit or retest another engineer’s work. Site-filtered engineer totals agree with their queue.
 
-Shared asset points reflect matching synthetic source evidence and current outcomes: battery impedance deviation 31% → 4%, cooling inlet temperature 29.4°C → 23.8°C, capacity peak load 84% → 62%. Shared device risk changes only at independent closure and returns to initial state on reset. Original pre-event snapshots stay available separately. These numbers are scripted demonstration values, not measured maintenance results or AI accuracy claims.
+Direct-call negative checks cover linked handoffs, ordinary alarm actions, configuration, topology, reset and model handlers. Analysis, decisions, retests and audit histories use fixed current-person IDs. Free-text reviewer names cannot impersonate the supervisor. Administrator is not a business superuser. This is frontend interaction gating, not production authentication or tamper resistance.
 
-## Issues found and corrected during review
+### Full linked workflows
 
-1. Site-filtered scenario cards originally had global summary totals.
-2. Current bad quality initially left a previous valid prediction visible.
-3. Scenario-only navigation did not persist selected context.
-4. Work orders initially lacked explicit immutable diagnosis/decision/evidence references.
-5. Legacy asset metrics and health advice conflicted with the new scenario evidence.
-6. Invalid saved journey data left orphan work orders; missing work references caused runtime errors.
-7. Restoring good quality allowed approval of an outdated diagnosis.
-8. Reviewer surname matching rejected unrelated people sharing a surname; identity matching now uses the actor values.
+Battery, cooling and capacity each complete operator acknowledgement and diagnosis request → analyst diagnosis → supervisor approval and assignment → assigned engineer acceptance and checklist → retest → supervisor independent acceptance → original alarm/work closure and case writeback. Work retains original asset, event, evidence, diagnosis, decision and knowledge IDs. IDs and provenance appear across the relevant drawer tabs. Completed data survives reload.
 
-9. Linked asset detail originally changed the old selected device without carrying scenario context; asset-to-monitor navigation now follows the same scenario.
+Negative paths cover skipped handoffs, missing reasons, unknown plans, deferral/rejection, duplicate acceptance/work creation, incomplete checklists, premature retest/closure, failed retest and fresh checklist, supervisor return for rework, wrong identities, invalid IDs and quality gates. Recovering valid quality requires a fresh diagnosis before approval.
 
-All corresponding assertions passed in the final suite run.
+A DOM click journey completes the battery scenario across identities using rendered buttons and checkbox events. Decision, retest and review HTML input remains escaped text.
 
-## Limits
+### Shared data and persistence
 
-No real browser visual/responsive/accessibility acceptance was performed. Known environment failures were Chromium socket EPERM, denied escalation/bwrap launch and cloud file-protocol rejection; denied routes were not bypassed or repeated. Available user-computer CUA is not a permitted substitute for direct parent operation. jsdom does not prove CSS layout, visual visibility, hit targets, keyboard/focus behavior, file:// browser policy or OS download saving.
+Passed retest updates synthetic telemetry while the alarm remains under processing and the case awaits independent acceptance. Closure is separately reflected in risk state and knowledge case visibility. Original event evidence remains available. Scripted values checked are impedance deviation 31% → 4%, cooling inlet 29.4°C → 23.8°C and branch peak load 84% → 62%; none are real measurements or AI accuracy claims.
 
-No production authentication, signed approval, actual field work, equipment control, AI inference, model performance, capacity/load/availability or regulatory compliance was tested. Role fields provide interaction gates only, not trusted identity or security.
+Single-case reset does not affect other closed cases. Full admin reset clears linked work. Corrupt journeys and orphan linked work recover consistently. v2 journey migration resets linked chains while preserving ordinary non-linked records. Selected linked entity context persists across reload.
+
+## Findings corrected and retested
+
+- Linked asset drawer selection originally changed active context without persisting it; reload persistence now passes.
+- Legacy ordinary failed-retest → rework → passed-retest history and evidence requirements were corrected during the separate legacy regression review.
+- Native work-state filters and fixed-role ordinary flows were adjusted and independently retested.
+
+## Boundaries and outstanding manual acceptance
+
+No real browser visual/responsive acceptance was possible. No browser screenshot was produced. Native Escape dismissal, modal focus trapping, browser Back behavior, layout/overflow, actual pointer hit targets, file:// policy and OS download saving remain unverified. jsdom DOM assertions do not prove CSS visibility or screen-reader behavior.
+
+Previously denied Chromium launch routes were not retried or bypassed. Available user-computer CUA was not used as a substitute. The review used only the existing permitted Node/jsdom environment.
+
+No real device connection, equipment action, backend authorization, signed approvals, real AI inference, model performance, production security or regulatory compliance was tested. The identity switch deliberately permits role simulation and is labelled as such.

@@ -48,27 +48,27 @@
     "status": "PASS"
   },
   {
-    "name": "all three closed counts, independent reset and reload has no stale entities",
+    "name": "all three close, independent reset and reload has no stale entities",
     "status": "PASS"
   },
   {
-    "name": "UI click path executes linked journey and escapes entered text",
+    "name": "UI clicks complete explicit cross-role chain and escape notes",
     "status": "PASS"
   },
   {
-    "name": "selection alone is persisted across reload",
+    "name": "selection alone persists across reload",
     "status": "PASS"
   },
   {
-    "name": "quality downgrade does not show active prediction as trusted",
+    "name": "quality downgrade suppresses trusted prediction in linked analysis",
     "status": "PASS"
   },
   {
-    "name": "site-filtered summary matches visible scenario cards",
+    "name": "site-filtered supervisor summary agrees with queue",
     "status": "PASS"
   },
   {
-    "name": "invalid API IDs return safely",
+    "name": "invalid API IDs safely reject",
     "status": "PASS"
   },
   {
@@ -76,11 +76,11 @@
     "status": "PASS"
   },
   {
-    "name": "orphan linked work reload recovers instead of throwing",
+    "name": "orphan linked work reload recovers",
     "status": "PASS"
   },
   {
-    "name": "shared asset metrics and risk follow scenario closure and reset",
+    "name": "shared asset metrics and risk follow closure and independent reset",
     "status": "PASS"
   },
   {
@@ -88,11 +88,11 @@
     "status": "PASS"
   },
   {
-    "name": "different reviewer with shared surname remains eligible",
+    "name": "reviewer free-text cannot impersonate fixed authenticated demo actor",
     "status": "PASS"
   },
   {
-    "name": "asset detail carries selected linked asset into monitor context",
+    "name": "asset detail selects correct linked evidence without navigating away",
     "status": "PASS"
   }
 ]

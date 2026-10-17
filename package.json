@@ -1,6 +1,6 @@
 {
   "name": "hongchuang-power-ai-demo",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "description": "红创科技电源动环AI智慧运维纯前端演示",
   "type": "module",
