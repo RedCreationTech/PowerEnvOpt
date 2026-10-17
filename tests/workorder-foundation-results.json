@@ -1,0 +1,126 @@
+[
+  {
+    "name": "battery: atomic takeover creates single stable WO before analysis",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: diagnosis approval dispatch retest trace one original WO",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: failed retest and review return retain identity and evidence history",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: quality refusal stays on original WO and cannot use stale diagnosis",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: unapproved actors cannot take over dispatch or close",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: atomic takeover creates single stable WO before analysis",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: diagnosis approval dispatch retest trace one original WO",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: failed retest and review return retain identity and evidence history",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: quality refusal stays on original WO and cannot use stale diagnosis",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: unapproved actors cannot take over dispatch or close",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: atomic takeover creates single stable WO before analysis",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: diagnosis approval dispatch retest trace one original WO",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: failed retest and review return retain identity and evidence history",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: quality refusal stays on original WO and cannot use stale diagnosis",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: unapproved actors cannot take over dispatch or close",
+    "status": "PASS"
+  },
+  {
+    "name": "DOM takeover immediately shows WO in detail, work center, and analyst queue",
+    "status": "PASS"
+  },
+  {
+    "name": "ordinary alarm takeover creates once and immediate WO is visible",
+    "status": "PASS"
+  },
+  {
+    "name": "manual creation rejects missing values enum spoof and site-device mismatch atomically",
+    "status": "PASS"
+  },
+  {
+    "name": "manual standalone and proactive WO preserve source and survive reload without alarm",
+    "status": "PASS"
+  },
+  {
+    "name": "manual title and description render as text, never executable markup",
+    "status": "PASS"
+  },
+  {
+    "name": "legacy acknowledged cases and ordinary alarms backfill exactly once with system audit",
+    "status": "PASS"
+  },
+  {
+    "name": "manual full lifecycle, failed retest, independent acceptance and reopen keep one WO",
+    "status": "PASS"
+  },
+  {
+    "name": "cancel and reopen linked work preserve historical records and require fresh analysis",
+    "status": "PASS"
+  },
+  {
+    "name": "manual authorization and optimistic version guards prevent mutations",
+    "status": "PASS"
+  },
+  {
+    "name": "manual missing-quality asset cannot produce trusted diagnosis",
+    "status": "PASS"
+  },
+  {
+    "name": "manual DOM form changes site and creates selected asset with source",
+    "status": "PASS"
+  },
+  {
+    "name": "site status counters and work list agree and selection survives cross-page navigation",
+    "status": "PASS"
+  },
+  {
+    "name": "ordinary quality recovery requires fresh analysis then retest and independent approval",
+    "status": "PASS"
+  },
+  {
+    "name": "analyst can analyze immediately after takeover without extra operator action",
+    "status": "PASS"
+  },
+  {
+    "name": "ordinary predicted alarm source remains predictive on takeover",
+    "status": "PASS"
+  },
+  {
+    "name": "legacy pre-work analysis is preserved with explicit migration and references backfilled",
+    "status": "PASS"
+  }
+]

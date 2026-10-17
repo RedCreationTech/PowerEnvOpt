@@ -72,11 +72,11 @@
     "status": "PASS"
   },
   {
-    "name": "corrupt journey reload cleans linked work and alarm together",
+    "name": "corrupt compatibility journey reload recovers from authoritative linked work",
     "status": "PASS"
   },
   {
-    "name": "orphan linked work reload recovers",
+    "name": "orphan linked work reload backfills once with explicit migration provenance",
     "status": "PASS"
   },
   {

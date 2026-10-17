@@ -4,7 +4,7 @@ Independent acceptance scope: battery, cooling and capacity frontend scenario jo
 
 1. Each journey has stable asset and event IDs with resolvable evidence, diagnosis, human decision, work order, retest and outcome references. Navigation must retain selected journey; reload must retain committed records.
 2. Analysis states its synthetic/assistive nature, cites the selected asset's evidence and correct scenario knowledge source, and cannot issue equipment commands. Invalid/missing/stale quality prevents valid prediction output and progression dependent on that prediction.
-3. Creating work requires an eligible human decision. Missing reason, rejection, deferral and unsafe direct calls cannot silently approve. Repeated clicks cannot create duplicate work orders.
+3. Eligible operator takeover creates the unique work order immediately, before diagnosis or approval. Repeated takeover cannot duplicate it. Rejection and deferral preserve the same work order; approval and dispatch require their own authorized decisions and cannot occur through unsafe direct calls.
 4. Work items preserve original event, asset, diagnosis and decision provenance. Checklist completion and human approval are explicit prerequisites. Retest failure returns to investigation/handling and cannot create a successful case.
 5. Successful closure requires a passed retest and required independent reviewer. Before/after metrics use matching units and truthful aggregate counts. Failed/rejected/deferred paths cannot increase completed-case counts or savings.
 6. A completed case links to its original knowledge sources and actual diagnosis. New analysis does not mutate historical case provenance. Reopened/invalidated work must not remain a currently successful case.

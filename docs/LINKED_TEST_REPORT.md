@@ -1,3 +1,5 @@
+> 历史验证快照：本文对应工单底座改版前的实现与计数，不代表当前 v4.0.0 验收结果。当前报告见 [WORKORDER_FOUNDATION_TEST_REPORT.md](WORKORDER_FOUNDATION_TEST_REPORT.md)。
+
 # v3 role-based operations: independent verification
 
 Verified 2026-10-17. Target: the delivered app.js, workflows.js, index.html and styles.css. This is a local, synthetic frontend demonstration.

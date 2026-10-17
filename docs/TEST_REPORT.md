@@ -1,3 +1,5 @@
+> 历史验证快照：本文对应工单底座改版前的实现与计数，不代表当前 v4.0.0 验收结果。当前报告见 [WORKORDER_FOUNDATION_TEST_REPORT.md](WORKORDER_FOUNDATION_TEST_REPORT.md)。
+
 > 历史报告：本文记录早期版本测试，不能作为 v3 当前验收结果。当前岗位协同版本以 [LINKED_TEST_REPORT.md](LINKED_TEST_REPORT.md) 及 tests/*results.json 为准。
 
 # 电源动环 AI 智慧运维演示：独立测试报告

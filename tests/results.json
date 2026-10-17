@@ -16,11 +16,11 @@
     "status": "PASS"
   },
   {
-    "name": "alarm cannot create work before acknowledgement",
+    "name": "alarm takeover requires a reason and creates work immediately",
     "status": "PASS"
   },
   {
-    "name": "alarm confirmation reason required",
+    "name": "alarm acknowledgement creates one linked work order immediately",
     "status": "PASS"
   },
   {

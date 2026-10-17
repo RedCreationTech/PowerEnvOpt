@@ -1,3 +1,5 @@
+> 历史验证快照：本文对应工单底座改版前的实现与计数，不代表当前 v4.0.0 验收结果。当前报告见 [WORKORDER_FOUNDATION_TEST_REPORT.md](WORKORDER_FOUNDATION_TEST_REPORT.md)。
+
 # v4 四阶段 AI 辅助决策：独立回归记录
 
 测试日期：2026-10-17。测试对象为 workflows.js / styles.css 的增量增强。

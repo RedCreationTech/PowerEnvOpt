@@ -91,32 +91,17 @@
   },
   {
     "page": "overview",
-    "label": "查看研判链",
+    "label": "接管并建单",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "处理待办",
+    "label": "接管并建单",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "查看研判链",
-    "errors": []
-  },
-  {
-    "page": "overview",
-    "label": "处理待办",
-    "errors": []
-  },
-  {
-    "page": "overview",
-    "label": "查看研判链",
-    "errors": []
-  },
-  {
-    "page": "overview",
-    "label": "处理待办",
+    "label": "接管并建单",
     "errors": []
   },
   {
@@ -401,27 +386,47 @@
   },
   {
     "page": "work",
-    "label": "待接单0",
+    "label": "新建工单",
     "errors": []
   },
   {
     "page": "work",
-    "label": "排查中0",
+    "label": "0待分析",
     "errors": []
   },
   {
     "page": "work",
-    "label": "待复测0",
+    "label": "0待方案审批",
     "errors": []
   },
   {
     "page": "work",
-    "label": "待审核0",
+    "label": "0待派单",
     "errors": []
   },
   {
     "page": "work",
-    "label": "已关闭0",
+    "label": "0待接单",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "0处理中",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "0待复测",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "0待验收",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "0已关闭",
     "errors": []
   },
   {

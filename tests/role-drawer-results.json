@@ -64,7 +64,7 @@
     "status": "PASS"
   },
   {
-    "name": "old schema migration preserves ordinary non-linked records and resets linked chain",
+    "name": "old schema migration preserves ordinary records and authoritative linked chain",
     "status": "PASS"
   },
   {
