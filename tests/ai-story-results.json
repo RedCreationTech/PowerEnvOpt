@@ -1,0 +1,46 @@
+[
+  {
+    "name": "battery: four-stage shared-state progression, selected plan/assignee and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: evidence knowledge mapping and conditional-model truth",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: rejection, failure, backflow and no premature case",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: four-stage shared-state progression, selected plan/assignee and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: evidence knowledge mapping and conditional-model truth",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: rejection, failure, backflow and no premature case",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: four-stage shared-state progression, selected plan/assignee and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: evidence knowledge mapping and conditional-model truth",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: rejection, failure, backflow and no premature case",
+    "status": "PASS"
+  },
+  {
+    "name": "quality recovery invalidates old risk preview and requires fresh diagnosis",
+    "status": "PASS"
+  },
+  {
+    "name": "all role page/navigation contexts survive new evidence entry points",
+    "status": "PASS"
+  }
+]

@@ -1,6 +1,21 @@
 [
   {
     "page": "overview",
+    "label": "供电连续性 · 待接管电池劣化的提前干预KB-BAT-01 · 下一维护周期",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "热风险管理 · 待接管制冷热点的预测排查KB-AC-01 · 未来 30 分钟",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "容量与变更 · 待接管扩容前的配电风险审查KB-CAP-01 · 计划投产窗口",
+    "errors": []
+  },
+  {
+    "page": "overview",
     "label": "进入",
     "errors": []
   },
@@ -41,6 +56,11 @@
   },
   {
     "page": "overview",
+    "label": "AI 辅助 · KB-BAT-01 · 可查研判依据",
+    "errors": []
+  },
+  {
+    "page": "overview",
     "label": "查看证据",
     "errors": []
   },
@@ -71,17 +91,32 @@
   },
   {
     "page": "overview",
-    "label": "打开详情",
+    "label": "查看研判链",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "打开详情",
+    "label": "处理待办",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "打开详情",
+    "label": "查看研判链",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "处理待办",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "查看研判链",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "处理待办",
     "errors": []
   },
   {
@@ -217,6 +252,11 @@
   {
     "page": "alarms",
     "label": "电池组压差偏大",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "AI 辅助 · KB-BAT-01 · 可查研判依据",
     "errors": []
   },
   {
