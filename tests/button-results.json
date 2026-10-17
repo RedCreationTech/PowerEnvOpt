@@ -1,6 +1,21 @@
 [
   {
     "page": "overview",
+    "label": "开始业务演示",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "开始业务演示",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "开始业务演示",
+    "errors": []
+  },
+  {
+    "page": "overview",
     "label": "进入",
     "errors": []
   },
@@ -67,6 +82,56 @@
   {
     "page": "overview",
     "label": "查看预测证据 →",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "本次异常资产蓄电池组 01HC-BJ-002",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "关联依赖 / 演示拓扑UPS 01HC-BJ-001",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "关联依赖 / 演示拓扑配电柜 01HC-BJ-004",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "查看关联测点",
+    "errors": []
+  },
+  {
+    "page": "assets",
+    "label": "查看事件与处置",
     "errors": []
   },
   {
@@ -161,7 +226,77 @@
   },
   {
     "page": "monitor",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "核验并进入 AI 分析",
+    "errors": []
+  },
+  {
+    "page": "monitor",
+    "label": "查看资产依赖",
+    "errors": []
+  },
+  {
+    "page": "monitor",
     "label": "↓ 导出 CSV",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "证据与趋势",
+    "errors": []
+  },
+  {
+    "page": "alarms",
+    "label": "进入 AI 决策工作区",
     "errors": []
   },
   {
@@ -256,6 +391,46 @@
   },
   {
     "page": "health",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "返回工单继续",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "查看知识与案例",
+    "errors": []
+  },
+  {
+    "page": "health",
+    "label": "查看总览变化",
+    "errors": []
+  },
+  {
+    "page": "health",
     "label": "查看计算边界",
     "errors": []
   },
@@ -276,7 +451,97 @@
   },
   {
     "page": "energy",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "带入制冷业务链",
+    "errors": []
+  },
+  {
+    "page": "energy",
+    "label": "带入容量业务链",
+    "errors": []
+  },
+  {
+    "page": "energy",
     "label": "↓ 导出分析 CSV",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "生成辅助分析",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "返回证据",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "数据质量",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "批准方案",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "暂缓",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "驳回",
     "errors": []
   },
   {
@@ -331,6 +596,36 @@
   },
   {
     "page": "work",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "work",
+    "label": "前往人工决策",
+    "errors": []
+  },
+  {
+    "page": "work",
     "label": "↓ 导出 CSV",
     "errors": []
   },
@@ -346,6 +641,41 @@
   },
   {
     "page": "quality",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "返回分析并重新运行",
+    "errors": []
+  },
+  {
+    "page": "quality",
+    "label": "查看证据快照",
+    "errors": []
+  },
+  {
+    "page": "quality",
     "label": "↓ 导出 CSV",
     "errors": []
   },
@@ -381,6 +711,46 @@
   },
   {
     "page": "models",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "04复测与回写→",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "查看模型卡",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "推进发布流程",
+    "errors": []
+  },
+  {
+    "page": "models",
+    "label": "回滚演示",
+    "errors": []
+  },
+  {
+    "page": "models",
     "label": "查看模型卡",
     "errors": []
   },
@@ -410,18 +780,28 @@
     "errors": []
   },
   {
-    "page": "models",
-    "label": "查看模型卡",
+    "page": "access",
+    "label": "重置场景",
     "errors": []
   },
   {
-    "page": "models",
-    "label": "推进发布流程",
+    "page": "access",
+    "label": "01发现与证据→",
     "errors": []
   },
   {
-    "page": "models",
-    "label": "回滚演示",
+    "page": "access",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "access",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "access",
+    "label": "04复测与回写→",
     "errors": []
   },
   {
@@ -437,6 +817,31 @@
   {
     "page": "access",
     "label": "↓ 下载演示点表 JSON",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "重置场景",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "01发现与证据→",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "02AI 辅助分析→",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "03人工决策与执行→",
+    "errors": []
+  },
+  {
+    "page": "audit",
+    "label": "04复测与回写→",
     "errors": []
   },
   {

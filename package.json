@@ -1,1 +1,15 @@
-{"name":"hongchuang-power-ai-demo","version":"1.0.0","private":true,"description":"红创科技电源动环AI智慧运维纯前端演示","type":"module","scripts":{"start":"node server.mjs","check":"node --check app.js && node --check server.mjs"},"engines":{"node":">=18"}}
+{
+  "name": "hongchuang-power-ai-demo",
+  "version": "2.0.0",
+  "private": true,
+  "description": "红创科技电源动环AI智慧运维纯前端演示",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check app.js && node --check workflows.js && node --check server.mjs",
+    "test": "npm test --prefix tests"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

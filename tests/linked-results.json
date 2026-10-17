@@ -1,0 +1,98 @@
+[
+  {
+    "name": "battery: complete chain, immutable links, shared alarm/work and provenance",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: guards, human decision, defer/reject and duplicate prevention",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: failed retest backflow, checklist reset, independent review",
+    "status": "PASS"
+  },
+  {
+    "name": "battery: quality blocks prediction, decision, retest and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: complete chain, immutable links, shared alarm/work and provenance",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: guards, human decision, defer/reject and duplicate prevention",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: failed retest backflow, checklist reset, independent review",
+    "status": "PASS"
+  },
+  {
+    "name": "cooling: quality blocks prediction, decision, retest and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: complete chain, immutable links, shared alarm/work and provenance",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: guards, human decision, defer/reject and duplicate prevention",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: failed retest backflow, checklist reset, independent review",
+    "status": "PASS"
+  },
+  {
+    "name": "capacity: quality blocks prediction, decision, retest and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "all three closed counts, independent reset and reload has no stale entities",
+    "status": "PASS"
+  },
+  {
+    "name": "UI click path executes linked journey and escapes entered text",
+    "status": "PASS"
+  },
+  {
+    "name": "selection alone is persisted across reload",
+    "status": "PASS"
+  },
+  {
+    "name": "quality downgrade does not show active prediction as trusted",
+    "status": "PASS"
+  },
+  {
+    "name": "site-filtered summary matches visible scenario cards",
+    "status": "PASS"
+  },
+  {
+    "name": "invalid API IDs return safely",
+    "status": "PASS"
+  },
+  {
+    "name": "corrupt journey reload cleans linked work and alarm together",
+    "status": "PASS"
+  },
+  {
+    "name": "orphan linked work reload recovers instead of throwing",
+    "status": "PASS"
+  },
+  {
+    "name": "shared asset metrics and risk follow scenario closure and reset",
+    "status": "PASS"
+  },
+  {
+    "name": "quality recovery requires fresh diagnosis before approval",
+    "status": "PASS"
+  },
+  {
+    "name": "different reviewer with shared surname remains eligible",
+    "status": "PASS"
+  },
+  {
+    "name": "asset detail carries selected linked asset into monitor context",
+    "status": "PASS"
+  }
+]

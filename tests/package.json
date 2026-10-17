@@ -1,1 +1,11 @@
-{"name":"hongchuang-demo-independent-qa","private":true,"type":"commonjs","scripts":{"test":"node test.cjs && node extra.cjs && node consistency.cjs && node buttons.cjs && node server-test.cjs"},"devDependencies":{"jsdom":"30.1.3"}}
+{
+  "name": "hongchuang-demo-independent-qa",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node test.cjs && node extra.cjs && node consistency.cjs && node buttons.cjs && node server-test.cjs && node linked-journeys.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.3"
+  }
+}

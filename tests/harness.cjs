@@ -5,7 +5,7 @@ const root=path.resolve(__dirname,'..');
 function load({url='http://localhost:8765/',storage='ok',seed}={}) {
  const errors=[],requests=[],downloads=[],alerts=[];
  const vc=new VirtualConsole(); vc.on('jsdomError',e=>errors.push(e.message));
- const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script[^>]*src="app.js"[^>]*><\/script>/,'');
+ const html=fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<script[^>]*src="(?:app|workflows).js"[^>]*><\/script>/g,'');
  const dom=new JSDOM(html,{url,runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc});
  const w=dom.window;
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','')};
@@ -18,7 +18,7 @@ function load({url='http://localhost:8765/',storage='ok',seed}={}) {
  w.WebSocket=function(){requests.push('WebSocket');throw Error('Unexpected WebSocket')};
  if(storage==='disabled') Object.defineProperty(w,'localStorage',{get(){throw new w.DOMException('Storage disabled','SecurityError')}});
  if(seed) Object.entries(seed).forEach(([k,v])=>w.localStorage.setItem(k,v));
- try {const script=w.document.createElement('script');script.textContent=fs.readFileSync(path.join(root,'app.js'),'utf8');w.document.body.appendChild(script)}catch(e){errors.push(e.stack)}
+ try {for(const file of ['app.js','workflows.js']) {if(!fs.existsSync(path.join(root,file)))continue;const script=w.document.createElement('script');script.textContent=fs.readFileSync(path.join(root,file),'utf8');w.document.body.appendChild(script)}}catch(e){errors.push(e.stack)}
  return {w,dom,errors,requests,downloads,alerts,eval:s=>w.eval(s),text:()=>w.document.body.textContent,click:s=>{const e=w.document.querySelector(s);if(!e)throw Error('Missing '+s);e.click();return e},close:()=>w.close()};
 }
 module.exports={load,root};
