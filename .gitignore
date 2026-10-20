@@ -9,3 +9,5 @@ Thumbs.db
 .runtime/
 reports/
 *.zip
+# Manual test outputs: screenshots, generated Word/Markdown records, exported reports
+manual/

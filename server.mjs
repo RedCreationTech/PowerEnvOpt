@@ -17,11 +17,14 @@ const assets = new Set([
   "/workflows.js",
   "/ai-ui.js",
   "/styles.css",
+  "/assets/hongchuang-logo.svg",
+  "/assets/hongchuang-mark.svg",
 ]);
 const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".svg": "image/svg+xml",
 };
 function equal(a, b) {
   return (
