@@ -309,16 +309,18 @@ function aiAccept() {
   const p = AIUI.preview,
     w = p && WO.get(p.id),
     note = $("#ai-accept-note")?.value.trim();
-  if (
-    !w ||
-    !note ||
-    !allowed("analyst", "engineer") ||
-    !aiEngineerMayAssist(w) ||
-    !aiRequestContextMatches(p) ||
-    w.version !== p.version ||
-    ["closed", "cancelled"].includes(w.phase)
-  )
-    return toast("未采纳：需分析/工程身份、核验依据和未变化的开放工单");
+  if (!p || !w) return toast("未采纳：当前没有可采纳的模型建议，请重新生成");
+  if (!note) return toast("未采纳：请先填写「人工核验与采纳依据」");
+  if (!allowed("analyst", "engineer"))
+    return toast("未采纳：仅分析或工程岗位可以采纳模型建议");
+  if (!aiEngineerMayAssist(w))
+    return toast("未采纳：当前工程师不是该工单的被指派人");
+  if (["closed", "cancelled"].includes(w.phase))
+    return toast("未采纳：工单已关闭或已取消，不能再采纳建议");
+  if (w.version !== p.version)
+    return toast("未采纳：工单在生成建议后已被更新，请重新生成建议");
+  if (!aiRequestContextMatches(p))
+    return toast("未采纳：当前工单或身份已变化，请重新生成建议");
   if (
     p.action !== "knowledge" &&
     (w.flow?.quality || dev(w.device).quality) !== "有效"
