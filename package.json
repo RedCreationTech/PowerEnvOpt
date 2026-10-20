@@ -1,13 +1,18 @@
 {
   "name": "hongchuang-power-ai-demo",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
-  "description": "红创科技电源动环AI智慧运维纯前端演示",
+  "description": "电源动环本地验证原型：真实模型辅助、Markdown Wiki 与独立合成评测",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check app.js && node --check workflows.js && node --check server.mjs",
-    "test": "npm test --prefix tests"
+    "check": "node scripts/check.mjs",
+    "test": "npm test --prefix tests && node --test tests/*.test.mjs",
+    "test:backend": "node tests/server-test.cjs && node --test tests/*.test.mjs",
+    "evaluate": "node evaluation/run.mjs",
+    "eval:export": "node evaluation/export.mjs",
+    "eval:baseline": "node evaluation/run.mjs --baseline-only",
+    "eval:wiki": "node evaluation/wiki-run.mjs"
   },
   "engines": {
     "node": ">=18"

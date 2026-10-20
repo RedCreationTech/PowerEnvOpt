@@ -1,44 +1,86 @@
 {
-  "mode": "Mocked Node request/response, no listening socket; not live HTTP/browser proof",
-  "bind": {
-    "port": 4173,
-    "host": "127.0.0.1"
-  },
+  "mode": "Real loopback HTTP; mock model only; no external requests",
+  "bind": "127.0.0.1",
   "results": [
     {
       "url": "/",
-      "method": "GET",
       "status": 200
     },
     {
       "url": "/app.js",
-      "method": "GET",
       "status": 200
     },
     {
       "url": "/styles.css",
-      "method": "HEAD",
       "status": 200
     },
     {
-      "url": "/nonexistent",
-      "method": "GET",
+      "url": "/.runtime/config.json",
       "status": 404
     },
     {
-      "url": "/",
-      "method": "POST",
-      "status": 405
+      "url": "/server/config.mjs",
+      "status": 404
     },
     {
-      "url": "/%ZZ",
-      "method": "GET",
+      "url": "/package.json",
+      "status": 404
+    },
+    {
+      "url": "/tests/server-test.cjs",
+      "status": 404
+    },
+    {
+      "url": "/evaluation/dataset.json",
+      "status": 404
+    },
+    {
+      "url": "/docs/README.md",
+      "status": 404
+    },
+    {
+      "url": "/api/config",
+      "status": 403
+    },
+    {
+      "url": "/api/session",
+      "status": 403
+    },
+    {
+      "url": "/api/config",
+      "status": 403
+    },
+    {
+      "url": "/api/session",
+      "status": 200
+    },
+    {
+      "url": "/api/config",
+      "status": 200
+    },
+    {
+      "url": "/api/config",
+      "status": 200
+    },
+    {
+      "url": "/api/config",
       "status": 400
     },
     {
-      "url": "/%2e%2e%2fQA_CHECKLIST.md",
-      "method": "GET",
-      "status": 403
+      "url": "/api/config",
+      "status": 200
+    },
+    {
+      "url": "/api/ai",
+      "status": 200
+    },
+    {
+      "url": "/api/ai",
+      "status": 400
+    },
+    {
+      "url": "/api/config",
+      "status": 413
     }
   ]
 }

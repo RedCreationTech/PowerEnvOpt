@@ -1,0 +1,62 @@
+[
+  {
+    "name": "all new surfaces and no implicit model call",
+    "status": "PASS"
+  },
+  {
+    "name": "six device families never silently use UPS knowledge",
+    "status": "PASS"
+  },
+  {
+    "name": "S3 lifecycle contains independent review and reopening invalidates recovered signal",
+    "status": "PASS"
+  },
+  {
+    "name": "real AI previews are escaped and manual acceptance cannot advance workflow",
+    "status": "PASS"
+  },
+  {
+    "name": "stale AI preview and invalid quality cannot be accepted",
+    "status": "PASS"
+  },
+  {
+    "name": "provider profiles remain masked and credentials never enter browser persistence",
+    "status": "PASS"
+  },
+  {
+    "name": "Wiki uses backend graph/search/source pages and escaped text",
+    "status": "PASS"
+  },
+  {
+    "name": "evaluation explicit request keeps backend report and export separate",
+    "status": "PASS"
+  },
+  {
+    "name": "engineers can run and accept AI only for their assigned workorder",
+    "status": "PASS"
+  },
+  {
+    "name": "pending AI response is discarded after switching to another workorder",
+    "status": "PASS"
+  },
+  {
+    "name": "pending AI response is discarded after identity changes even on same workorder",
+    "status": "PASS"
+  },
+  {
+    "name": "accepted preview cannot use a note in another drawer",
+    "status": "PASS"
+  },
+  {
+    "name": "Wiki SVG renders actual nodes and edges with keyboard and click page navigation",
+    "status": "PASS"
+  },
+  {
+    "name": "AI context binds explicit knowledge version, not workorder revision",
+    "status": "PASS"
+  },
+  {
+    "name": "AI citation history retains cloned original source snapshot after live Wiki changes",
+    "status": "PASS"
+  }
+]

@@ -32,6 +32,22 @@
     "status": "PASS"
   },
   {
+    "name": "energy: complete chain, immutable links, shared alarm/work and provenance",
+    "status": "PASS"
+  },
+  {
+    "name": "energy: guards, human decision, defer/reject and duplicate prevention",
+    "status": "PASS"
+  },
+  {
+    "name": "energy: failed retest backflow, checklist reset, independent review",
+    "status": "PASS"
+  },
+  {
+    "name": "energy: quality blocks prediction, decision, retest and closure",
+    "status": "PASS"
+  },
+  {
     "name": "capacity: complete chain, immutable links, shared alarm/work and provenance",
     "status": "PASS"
   },
@@ -48,7 +64,7 @@
     "status": "PASS"
   },
   {
-    "name": "all three close, independent reset and reload has no stale entities",
+    "name": "all four close, independent reset and reload has no stale entities",
     "status": "PASS"
   },
   {

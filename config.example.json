@@ -1,0 +1,29 @@
+{
+  "activeProvider": "deepseek",
+  "profiles": {
+    "deepseek": {
+      "provider": "deepseek",
+      "model": "deepseek-flash",
+      "baseURL": "https://api.deepseek.com",
+      "timeoutMs": 30000,
+      "maxRetries": 0,
+      "apiKey": ""
+    },
+    "qwen": {
+      "provider": "qwen",
+      "model": "qwen-plus",
+      "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "timeoutMs": 30000,
+      "maxRetries": 0,
+      "apiKey": ""
+    },
+    "local": {
+      "provider": "local",
+      "model": "local-model",
+      "baseURL": "http://127.0.0.1:11434/v1",
+      "timeoutMs": 30000,
+      "maxRetries": 0,
+      "apiKey": ""
+    }
+  }
+}

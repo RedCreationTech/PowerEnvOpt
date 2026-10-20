@@ -1,17 +1,22 @@
 [
   {
     "page": "overview",
-    "label": "供电连续性 · 待接管电池劣化的提前干预KB-BAT-01 · 下一维护周期",
+    "label": "热风险管理 · 待接管S1 · 精密空调高温预测排查KB-AC-01 · 未来 30 分钟",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "热风险管理 · 待接管制冷热点的预测排查KB-AC-01 · 未来 30 分钟",
+    "label": "供电连续性 · 待接管S2 · UPS 电池劣化提前干预KB-BAT-01 · 下一维护周期",
     "errors": []
   },
   {
     "page": "overview",
-    "label": "容量与变更 · 待接管扩容前的配电风险审查KB-CAP-01 · 计划投产窗口",
+    "label": "能耗优化 · 待接管S3 · 空调同负载能耗异常与优化验证KB-ENERGY-01 · 下一同负载验证窗口",
+    "errors": []
+  },
+  {
+    "page": "overview",
+    "label": "容量与变更 · 待接管扩展 · 配电容量风险审查KB-CAP-01 · 计划投产窗口",
     "errors": []
   },
   {
@@ -106,7 +111,7 @@
   },
   {
     "page": "overview",
-    "label": "打开详情",
+    "label": "接管并建单",
     "errors": []
   },
   {
@@ -331,7 +336,17 @@
   },
   {
     "page": "energy",
+    "label": "打开 S3 证据与工单链",
+    "errors": []
+  },
+  {
+    "page": "energy",
     "label": "↓ 导出分析 CSV",
+    "errors": []
+  },
+  {
+    "page": "assistant",
+    "label": "打开工单中心",
     "errors": []
   },
   {

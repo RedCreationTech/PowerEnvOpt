@@ -1,0 +1,259 @@
+{
+  "suite": "powerenv-wiki-e2e-v1",
+  "suiteHash": "981b2c0c88e45b2a7033bcb260765c3418e221bc5def28cf696230e6a7e60ccc",
+  "wikiCorpusHash": "625cc5eafa81f8bfd653d0724d31a3897e2f4325f171c91485d24f0a62fbc1a4",
+  "mode": "retrieval_only",
+  "syntheticOnly": true,
+  "notR11Acceptance": true,
+  "factualValidityAssessed": false,
+  "modelCalls": 0,
+  "requestedModel": null,
+  "rows": [
+    {
+      "caseId": "wiki-01",
+      "input": {
+        "query": "过滤器 压差 风机 回风 告警，应先核对哪些证据？",
+        "family": "cooling",
+        "model": "HC-PAC30",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "cooling-evidence"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "cooling-evidence",
+        "energy-baseline"
+      ],
+      "retrieval": {
+        "precision": 0.5,
+        "recall": 1,
+        "exactSourceSet": false
+      },
+      "modelInputHash": "3e013e32a4699bf90089018772cbd83048453d8dc29792729f491198f0ba0dd5",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-02",
+      "input": {
+        "query": "制冷剂不足 传感器 保护阈值，能否仅凭高压告警直接操作？",
+        "family": "cooling",
+        "model": "HC-PAC30",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "cooling-evidence"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "cooling-evidence",
+        "energy-baseline"
+      ],
+      "retrieval": {
+        "precision": 0.5,
+        "recall": 1,
+        "exactSourceSet": false
+      },
+      "modelInputHash": "8306d52ed49675081e7a4c838d3848a60d9d063554eff7c05c1284bc332c32ca",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-03",
+      "input": {
+        "query": "节能率 kWh 混杂因素，电量变低能否证明优化有效？",
+        "family": "cooling",
+        "model": "HC-PAC30",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "energy-baseline"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "energy-baseline",
+        "cooling-evidence"
+      ],
+      "retrieval": {
+        "precision": 0.5,
+        "recall": 1,
+        "exactSourceSet": false
+      },
+      "modelInputHash": "f43d24f5f0376f0051859d04f02886dfb15b9f08897ede5b9e5f9ad2d9fe4a74",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-04",
+      "input": {
+        "query": "基线为零 窗口不等长，节能比较需要哪些约束？",
+        "family": "cooling",
+        "model": "HC-PAC30",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "energy-baseline"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "energy-baseline",
+        "cooling-evidence"
+      ],
+      "retrieval": {
+        "precision": 0.5,
+        "recall": 1,
+        "exactSourceSet": false
+      },
+      "modelInputHash": "d71a461aa93e1c4cb5a774740312a1665aab57e2e87333510e392c8c0738b5ad",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-05",
+      "input": {
+        "query": "单体电压 内阻 浮充 校准，如何核验电池健康异常？",
+        "family": "ups",
+        "model": "HC-UPS40",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "battery-evidence"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "battery-evidence"
+      ],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "140d0311b7cbff135d56b904c1e9b650dc944c009b99f17e113439784f15f8e0",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-06",
+      "input": {
+        "query": "放电曲线 后备时间 串组，证据不足时应如何描述？",
+        "family": "ups",
+        "model": "HC-BAT192",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [
+        "battery-evidence"
+      ],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [
+        "battery-evidence"
+      ],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "a77030dc40ca5f17c77f53583aa6ce2b854b54ccc5f4e6263c0695b5d30fe67a",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-07",
+      "input": {
+        "query": "风机 告警 检修证据",
+        "family": "cooling",
+        "model": "HC-PAC999",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "aafca30fc078096a5e65a51c5416c1944bbdd9672d4c829327c25b2d903725ce",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-08",
+      "input": {
+        "query": "风机 告警 检修证据",
+        "family": "cooling",
+        "model": "HC-PAC30",
+        "version": "demo-v0"
+      },
+      "expectedSourceIds": [],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "d15df70b557bd89434e4b9cbfc79a48b85f79950838bdd8d7f3c9af2f78ff227",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-09",
+      "input": {
+        "query": "电池 内阻 告警",
+        "family": "cooling",
+        "model": "HC-UPS40",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "2916bf1ff63b12901eb97e4df8525de95910503c63f501dc1248887708a24404",
+      "modelNotRun": true
+    },
+    {
+      "caseId": "wiki-10",
+      "input": {
+        "query": "电源 告警 核验",
+        "family": "unknown-device",
+        "model": "UNKNOWN",
+        "version": "demo-v1"
+      },
+      "expectedSourceIds": [],
+      "status": "retrieval_only",
+      "citations": null,
+      "retrievedSourceIds": [],
+      "retrieval": {
+        "precision": 1,
+        "recall": 1,
+        "exactSourceSet": true
+      },
+      "modelInputHash": "9e8737361862592b31f804c068b0ab14acce0076a0b1f0b6fc79db52d73458bc",
+      "modelNotRun": true
+    }
+  ],
+  "limitations": [
+    "实际 Wiki 检索链路的独立小样本自测，不替代 R11 94% 门槛。",
+    "种子 Wiki 和问题为合成材料，不是真实厂家手册或实站证据。",
+    "来源集合正确、引用精确率/召回率不证明回答事实正确或维修建议安全。",
+    "Wiki 内容哈希记录当次实际库；库变化可能使固定预期不再适用。"
+  ],
+  "summary": {
+    "totalCases": 10,
+    "failedCases": 0,
+    "modelValidatedCases": 0,
+    "retrievalExpectedCoveredCases": 10,
+    "retrievalMacroRecall": 1,
+    "sourceCorrectCases": 0,
+    "sourceCorrectness": null,
+    "macroCitationPrecision": null,
+    "macroCitationRecall": null
+  },
+  "reportHash": "5cc96ed8c949779bb9cc4c09c80806091e5040c1a6f1f0325e292fbcbce64310"
+}

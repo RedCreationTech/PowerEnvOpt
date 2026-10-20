@@ -1,0 +1,834 @@
+{
+  "kind": "independent-numerical-baseline-only",
+  "syntheticOnly": true,
+  "modelCalls": 0,
+  "modelEvaluation": "not_run",
+  "modelGateStatus": "not_tested",
+  "baseline": "trailing-six OLS plus explicitly supplied known intervention; no provider or future labels",
+  "dataset": {
+    "version": "powerenv-synthetic-v2",
+    "seed": 20261020,
+    "sha256": "0f34b51f35e1f9fcb3d5f7c9a5b7bab68468615b4bd8ef2148a0464f4463dbc8"
+  },
+  "metrics": {
+    "R08": {
+      "metric": "within-series pooled R² (provisional)",
+      "value": -46.38795477561644,
+      "threshold": "> 0.97",
+      "totalCases": 12,
+      "validCases": 12,
+      "failedCases": 0,
+      "coverage": 1,
+      "pass": false,
+      "officialDefinitionPending": true,
+      "pooledGlobalR2": 0.982553358665524,
+      "withinSeriesSST": 0.5830177133333314,
+      "numericMetricsExcludeFailedCases": true
+    },
+    "R09": {
+      "metric": "MAE / fixed 20°C operating span",
+      "value": 0.03636528108465615,
+      "threshold": "< 0.05",
+      "totalCases": 12,
+      "validCases": 12,
+      "failedCases": 0,
+      "coverage": 1,
+      "pass": true,
+      "maeC": 0.727305621693123,
+      "normalizationSpanC": 20,
+      "numericMetricsExcludeFailedCases": true
+    },
+    "R10": {
+      "metric": "WAPE",
+      "value": 0.03441983204823895,
+      "threshold": "< 0.05",
+      "totalCases": 12,
+      "validCases": 12,
+      "failedCases": 0,
+      "coverage": 1,
+      "pass": true,
+      "numericMetricsExcludeFailedCases": true
+    }
+  },
+  "byScenario": {
+    "normal": {
+      "R08": {
+        "metric": "within-series pooled R² (provisional)",
+        "value": -9.82422079176072,
+        "threshold": "> 0.97",
+        "totalCases": 4,
+        "validCases": 4,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "officialDefinitionPending": true,
+        "pooledGlobalR2": 0.9913122013984945,
+        "withinSeriesSST": 0.028063652266664272,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R09": {
+        "metric": "MAE / fixed 20°C operating span",
+        "value": 0.030685451190476228,
+        "threshold": "< 0.05",
+        "totalCases": 4,
+        "validCases": 4,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "maeC": 0.6137090238095245,
+        "normalizationSpanC": 20,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R10": {
+        "metric": "WAPE",
+        "value": 0.053635448006722576,
+        "threshold": "< 0.05",
+        "totalCases": 4,
+        "validCases": 4,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "numericMetricsExcludeFailedCases": true
+      }
+    },
+    "degradation": {
+      "R08": {
+        "metric": "within-series pooled R² (provisional)",
+        "value": 0.8710579563463853,
+        "threshold": "> 0.97",
+        "totalCases": 3,
+        "validCases": 3,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "officialDefinitionPending": true,
+        "pooledGlobalR2": 0.9986797711804652,
+        "withinSeriesSST": 0.5314786905999991,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R09": {
+        "metric": "MAE / fixed 20°C operating span",
+        "value": 0.031020078306878397,
+        "threshold": "< 0.05",
+        "totalCases": 3,
+        "validCases": 3,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "maeC": 0.6204015661375679,
+        "normalizationSpanC": 20,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R10": {
+        "metric": "WAPE",
+        "value": 0.04300565904253783,
+        "threshold": "< 0.05",
+        "totalCases": 3,
+        "validCases": 3,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "numericMetricsExcludeFailedCases": true
+      }
+    },
+    "regime_shift": {
+      "R08": {
+        "metric": "within-series pooled R² (provisional)",
+        "value": -39.40640809381128,
+        "threshold": "> 0.97",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "officialDefinitionPending": true,
+        "pooledGlobalR2": 0.9945391829886423,
+        "withinSeriesSST": 0.00026283113333334344,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R09": {
+        "metric": "MAE / fixed 20°C operating span",
+        "value": 0.03377317857142872,
+        "threshold": "< 0.05",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "maeC": 0.6754635714285744,
+        "normalizationSpanC": 20,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R10": {
+        "metric": "WAPE",
+        "value": 0.03289914746798506,
+        "threshold": "< 0.05",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "numericMetricsExcludeFailedCases": true
+      }
+    },
+    "out_of_distribution": {
+      "R08": {
+        "metric": "within-series pooled R² (provisional)",
+        "value": -2.8692023869881327,
+        "threshold": "> 0.97",
+        "totalCases": 1,
+        "validCases": 1,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "officialDefinitionPending": true,
+        "pooledGlobalR2": -2.8692023869881327,
+        "withinSeriesSST": 0.0029291152666667797,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R09": {
+        "metric": "MAE / fixed 20°C operating span",
+        "value": 0.05015447619047606,
+        "threshold": "< 0.05",
+        "totalCases": 1,
+        "validCases": 1,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "maeC": 1.0030895238095212,
+        "normalizationSpanC": 20,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R10": {
+        "metric": "WAPE",
+        "value": 0.01538245896154801,
+        "threshold": "< 0.05",
+        "totalCases": 1,
+        "validCases": 1,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "numericMetricsExcludeFailedCases": true
+      }
+    },
+    "sensor_fault": {
+      "R08": {
+        "metric": "within-series pooled R² (provisional)",
+        "value": -1341.6612008216298,
+        "threshold": "> 0.97",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "officialDefinitionPending": true,
+        "pooledGlobalR2": -51.07911035794488,
+        "withinSeriesSST": 0.020283424066667822,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R09": {
+        "metric": "MAE / fixed 20°C operating span",
+        "value": 0.0514402500000001,
+        "threshold": "< 0.05",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": false,
+        "maeC": 1.028805000000002,
+        "normalizationSpanC": 20,
+        "numericMetricsExcludeFailedCases": true
+      },
+      "R10": {
+        "metric": "WAPE",
+        "value": 0.02959470523178873,
+        "threshold": "< 0.05",
+        "totalCases": 2,
+        "validCases": 2,
+        "failedCases": 0,
+        "coverage": 1,
+        "pass": true,
+        "numericMetricsExcludeFailedCases": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "caseId": "R08-01",
+      "task": "R08",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        70.03579,
+        70.06516,
+        70.09956
+      ],
+      "prediction": [
+        69.94942866666666,
+        69.96151495238095,
+        69.97360123809523
+      ]
+    },
+    {
+      "caseId": "R08-02",
+      "task": "R08",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        72.94077,
+        73.03779,
+        73.15149
+      ],
+      "prediction": [
+        72.82692,
+        72.86685,
+        72.90678
+      ]
+    },
+    {
+      "caseId": "R08-03",
+      "task": "R08",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        73.81118,
+        73.74984,
+        73.72837
+      ],
+      "prediction": [
+        73.93931133333332,
+        73.98247076190475,
+        74.02563019047618
+      ]
+    },
+    {
+      "caseId": "R08-04",
+      "task": "R08",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        74.59726,
+        74.59002,
+        74.58428
+      ],
+      "prediction": [
+        74.53586666666666,
+        74.53690523809523,
+        74.5379438095238
+      ]
+    },
+    {
+      "caseId": "R08-05",
+      "task": "R08",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        71.73256,
+        71.34156,
+        71.00305
+      ],
+      "prediction": [
+        71.83659266666669,
+        71.49610152380954,
+        71.1556103809524
+      ]
+    },
+    {
+      "caseId": "R08-06",
+      "task": "R08",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        74.20048,
+        73.8966,
+        73.63383
+      ],
+      "prediction": [
+        74.196278,
+        73.87216599999999,
+        73.54805400000001
+      ]
+    },
+    {
+      "caseId": "R08-07",
+      "task": "R08",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        77.43144,
+        77.18091,
+        76.97591
+      ],
+      "prediction": [
+        77.44873133333334,
+        77.1887821904762,
+        76.92883304761907
+      ]
+    },
+    {
+      "caseId": "R08-08",
+      "task": "R08",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        80.42502,
+        80.41945,
+        80.41416
+      ],
+      "prediction": [
+        80.40112866666666,
+        80.43610495238094,
+        80.47108123809522
+      ]
+    },
+    {
+      "caseId": "R08-09",
+      "task": "R08",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        81.5684,
+        81.55772,
+        81.54822
+      ],
+      "prediction": [
+        81.51103466666666,
+        81.5123998095238,
+        81.51376495238094
+      ]
+    },
+    {
+      "caseId": "R08-10",
+      "task": "R08",
+      "scenario": "out_of_distribution",
+      "status": "ok",
+      "expected": [
+        65.97808,
+        65.91275,
+        65.91088
+      ],
+      "prediction": [
+        65.98893600000001,
+        65.89750771428572,
+        65.80607942857144
+      ]
+    },
+    {
+      "caseId": "R08-11",
+      "task": "R08",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        87.88344,
+        87.9615,
+        88.08148
+      ],
+      "prediction": [
+        86.18839333333332,
+        85.15813619047618,
+        84.12787904761905
+      ]
+    },
+    {
+      "caseId": "R08-12",
+      "task": "R08",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        88.5682,
+        88.55424,
+        88.54061
+      ],
+      "prediction": [
+        89.34783666666667,
+        89.03431666666665,
+        88.72079666666666
+      ]
+    },
+    {
+      "caseId": "R09-01",
+      "task": "R09",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        20.49169,
+        20.19364,
+        20.14182
+      ],
+      "prediction": [
+        21.030065333333333,
+        21.075947333333335,
+        21.121829333333334
+      ]
+    },
+    {
+      "caseId": "R09-02",
+      "task": "R09",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        20.01874,
+        20.05152,
+        20.09028
+      ],
+      "prediction": [
+        19.747893333333334,
+        19.82847761904762,
+        19.909061904761906
+      ]
+    },
+    {
+      "caseId": "R09-03",
+      "task": "R09",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        23.0345,
+        23.33353,
+        23.76086
+      ],
+      "prediction": [
+        22.507784666666662,
+        22.463304095238094,
+        22.41882352380952
+      ]
+    },
+    {
+      "caseId": "R09-04",
+      "task": "R09",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        24.53753,
+        24.4853,
+        24.45418
+      ],
+      "prediction": [
+        24.691356666666664,
+        25.008913809523808,
+        25.32647095238095
+      ]
+    },
+    {
+      "caseId": "R09-05",
+      "task": "R09",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        26.9799,
+        27.55802,
+        28.23355
+      ],
+      "prediction": [
+        26.387274666666666,
+        26.63281980952381,
+        26.878364952380952
+      ]
+    },
+    {
+      "caseId": "R09-06",
+      "task": "R09",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        25.62159,
+        25.56946,
+        25.76192
+      ],
+      "prediction": [
+        26.121082000000005,
+        26.40184542857143,
+        26.68260885714286
+      ]
+    },
+    {
+      "caseId": "R09-07",
+      "task": "R09",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        27.80248,
+        28.08039,
+        28.37625
+      ],
+      "prediction": [
+        27.70720466666667,
+        28.17553552380953,
+        28.643866380952385
+      ]
+    },
+    {
+      "caseId": "R09-08",
+      "task": "R09",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        25.95858,
+        26.03491,
+        26.35879
+      ],
+      "prediction": [
+        25.70055733333333,
+        25.47245133333333,
+        25.244345333333328
+      ]
+    },
+    {
+      "caseId": "R09-09",
+      "task": "R09",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        28.48897,
+        28.72302,
+        29.00998
+      ],
+      "prediction": [
+        28.000186,
+        28.034704857142856,
+        28.069223714285712
+      ]
+    },
+    {
+      "caseId": "R09-10",
+      "task": "R09",
+      "scenario": "out_of_distribution",
+      "status": "ok",
+      "expected": [
+        43.2111,
+        42.84374,
+        42.66069
+      ],
+      "prediction": [
+        43.79873333333333,
+        43.90826619047619,
+        44.01779904761904
+      ]
+    },
+    {
+      "caseId": "R09-11",
+      "task": "R09",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        26.48148,
+        26.17207,
+        25.97091
+      ],
+      "prediction": [
+        25.379298,
+        24.559480285714283,
+        23.739662571428568
+      ]
+    },
+    {
+      "caseId": "R09-12",
+      "task": "R09",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        28.23495,
+        28.47206,
+        28.75148
+      ],
+      "prediction": [
+        28.570507999999993,
+        28.30093171428571,
+        28.031355428571423
+      ]
+    },
+    {
+      "caseId": "R10-01",
+      "task": "R10",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        244.2107,
+        247.167,
+        256.23006
+      ],
+      "prediction": [
+        242.7464973333333,
+        241.3820999047619,
+        240.01770247619046
+      ]
+    },
+    {
+      "caseId": "R10-02",
+      "task": "R10",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        237.44534,
+        240.21792,
+        243.24437
+      ],
+      "prediction": [
+        230.32289333333333,
+        232.9689161904762,
+        235.61493904761906
+      ]
+    },
+    {
+      "caseId": "R10-03",
+      "task": "R10",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        223.3745,
+        226.56354,
+        231.33266
+      ],
+      "prediction": [
+        212.07565333333332,
+        209.75744333333333,
+        207.4392333333333
+      ]
+    },
+    {
+      "caseId": "R10-04",
+      "task": "R10",
+      "scenario": "normal",
+      "status": "ok",
+      "expected": [
+        204.05753,
+        203.80478,
+        208.371
+      ],
+      "prediction": [
+        196.24143533333327,
+        188.44577733333327,
+        180.65011933333327
+      ]
+    },
+    {
+      "caseId": "R10-05",
+      "task": "R10",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        248.08912,
+        245.22053,
+        248.47145
+      ],
+      "prediction": [
+        246.5493693333333,
+        239.29762819047613,
+        232.045887047619
+      ]
+    },
+    {
+      "caseId": "R10-06",
+      "task": "R10",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        405.75665,
+        412.09243,
+        422.22908
+      ],
+      "prediction": [
+        395.37323599999996,
+        393.6288134285714,
+        391.8843908571428
+      ]
+    },
+    {
+      "caseId": "R10-07",
+      "task": "R10",
+      "scenario": "degradation",
+      "status": "ok",
+      "expected": [
+        320.95448,
+        311.58988,
+        308.05996
+      ],
+      "prediction": [
+        331.3602433333333,
+        327.735619047619,
+        324.11099476190475
+      ]
+    },
+    {
+      "caseId": "R10-08",
+      "task": "R10",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        475.35702,
+        476.76794,
+        483.8235
+      ],
+      "prediction": [
+        470.89891733333326,
+        466.25290847619044,
+        461.60689961904757
+      ]
+    },
+    {
+      "caseId": "R10-09",
+      "task": "R10",
+      "scenario": "regime_shift",
+      "status": "ok",
+      "expected": [
+        496.29685,
+        500.1308,
+        506.65872
+      ],
+      "prediction": [
+        484.7453766666667,
+        481.19478809523815,
+        477.64419952380956
+      ]
+    },
+    {
+      "caseId": "R10-10",
+      "task": "R10",
+      "scenario": "out_of_distribution",
+      "status": "ok",
+      "expected": [
+        984.51268,
+        979.04957,
+        979.31478
+      ],
+      "prediction": [
+        995.3112580000001,
+        996.0485717142858,
+        996.7858854285715
+      ]
+    },
+    {
+      "caseId": "R10-11",
+      "task": "R10",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        581.1931,
+        574.87589,
+        571.51247
+      ],
+      "prediction": [
+        563.785068,
+        549.8909088571429,
+        535.9967497142858
+      ]
+    },
+    {
+      "caseId": "R10-12",
+      "task": "R10",
+      "scenario": "sensor_fault",
+      "status": "ok",
+      "expected": [
+        646.62514,
+        648.14605,
+        656.00462
+      ],
+      "prediction": [
+        662.25902,
+        654.8003042857142,
+        647.3415885714285
+      ]
+    }
+  ],
+  "reportHash": "f0dffee4ae2de9c7fc917468a76bcf817f23254044498d8a61d2ff8b2f870796"
+}

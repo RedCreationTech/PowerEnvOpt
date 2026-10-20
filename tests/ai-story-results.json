@@ -24,6 +24,18 @@
     "status": "PASS"
   },
   {
+    "name": "energy: four-stage shared-state progression, selected plan/assignee and closure",
+    "status": "PASS"
+  },
+  {
+    "name": "energy: evidence knowledge mapping and conditional-model truth",
+    "status": "PASS"
+  },
+  {
+    "name": "energy: rejection, failure, backflow and no premature case",
+    "status": "PASS"
+  },
+  {
     "name": "capacity: four-stage shared-state progression, selected plan/assignee and closure",
     "status": "PASS"
   },

@@ -1,3 +1,5 @@
+> v5 历史资料提示：本文保留早期设计/验证快照，不作为当前真实 AI 版本验收结论。当前能力与限制以 README、REAL_AI_TEST_REPORT.md 和 evaluation.md 为准。
+
 > 历史验证快照：本文对应工单底座改版前的实现与计数，不代表当前 v4.0.0 验收结果。当前报告见 [WORKORDER_FOUNDATION_TEST_REPORT.md](WORKORDER_FOUNDATION_TEST_REPORT.md)。
 
 # v3 role-based operations: independent verification

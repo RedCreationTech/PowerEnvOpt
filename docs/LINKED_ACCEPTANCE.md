@@ -1,3 +1,5 @@
+> v5 历史资料提示：本文保留早期设计/验证快照，不作为当前真实 AI 版本验收结论。当前能力与限制以 README、REAL_AI_TEST_REPORT.md 和 evaluation.md 为准。
+
 # Linked workflow acceptance checklist
 
 Independent acceptance scope: battery, cooling and capacity frontend scenario journeys. Synthetic scenario outcomes are not real equipment tests or validated AI predictions.

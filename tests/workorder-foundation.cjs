@@ -115,7 +115,7 @@ test('manual DOM form changes site and creates selected asset with source',(h,w,
 test('site status counters and work list agree and selection survives cross-page navigation',(h,w,f)=>{
  for(const id of Object.keys(f.cases)){f.switchPerson('operator');f.acknowledge(id,'跨站接管');}f.close();w.navigate('work');
  const site=state(w).devices.find(d=>d.id===f.cases.cooling.device).site;w.selectSite(site);const content=w.document.querySelector('#content');assert.ok(content.textContent.includes(rec(f,'cooling').workId));assert.ok(!content.textContent.includes(rec(f,'battery').workId));
- const counter=[...content.querySelectorAll('.work-status-strip button')].find(b=>b.textContent.includes('待分析'));assert.equal(counter.querySelector('b').textContent,'1');counter.click();assert.equal(w.document.querySelectorAll('#content tbody tr').length,1);
+ const counter=[...content.querySelectorAll('.work-status-strip button')].find(b=>b.textContent.includes('待分析'));assert.equal(counter.querySelector('b').textContent,'2');counter.click();assert.equal(w.document.querySelectorAll('#content tbody tr').length,2);
  f.open('cooling','evidence');f.go('monitor','cooling');assert.equal(f.getState().active,'cooling');assert.ok(w.document.querySelector('#entity-drawer').textContent.includes(f.cases.cooling.device));
 });
 test('ordinary quality recovery requires fresh analysis then retest and independent approval',(h,w,f)=>{
