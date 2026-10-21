@@ -882,15 +882,23 @@
     }
 
     function teleport(siteName) {
-      const idx = ctx.sites.indexOf(siteName);
-      if (idx < 0) return;
-      const cx = HALL_X[idx] != null ? HALL_X[idx] : idx * 25;
       st.tween = null;
       st.pendingSelect = null;
-      camera.position.set(cx, EYE_H, -3.1);
-      st.yaw = st.tyaw = Math.PI;
-      st.pitch = st.tpitch = 0;
-      st.eyeTarget = EYE_H;
+      const idx = ctx.sites.indexOf(siteName);
+      if (idx < 0) {
+        // 全部站点：高位全景，三个大厅尽收
+        camera.position.set(0, 12.5, -27);
+        st.yaw = st.tyaw = Math.PI;
+        st.pitch = st.tpitch = -0.3;
+        st.eyeTarget = 12.5;
+      } else {
+        // 单站点：厅前升高正视，站名铭牌与 A/B 机房完整可见
+        const cx = HALL_X[idx] != null ? HALL_X[idx] : idx * 25;
+        camera.position.set(cx, 3.4, -11);
+        st.yaw = st.tyaw = Math.PI;
+        st.pitch = st.tpitch = -0.16;
+        st.eyeTarget = 3.4;
+      }
       camera.rotation.set(st.pitch, st.yaw, 0);
     }
 
@@ -1040,7 +1048,7 @@
             camera.position.x = THREE.MathUtils.clamp(camera.position.x, -WORLD_LIMIT, WORLD_LIMIT);
             camera.position.z = THREE.MathUtils.clamp(camera.position.z, -WORLD_LIMIT, WORLD_LIMIT);
           }
-          if (iy) st.eyeTarget = THREE.MathUtils.clamp(st.eyeTarget + iy * 1.6 * dt, 0.6, 4.5);
+          if (iy) st.eyeTarget = THREE.MathUtils.clamp(st.eyeTarget + iy * 1.6 * dt, 0.6, 14);
           if (Math.abs(st.zoomVel) > 0.01) {
             camera.getWorldDirection(tmpF);
             tmpF.y = 0;

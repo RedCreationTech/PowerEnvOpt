@@ -1694,7 +1694,8 @@ function aiModelRender(key, out) {
 
 // ———————————— WebGL 3D 数字孪生机房（资产页：漫游 + 点击进机理示意）————————————
 let twinCtrl = null,
-  twinHostEl = null;
+  twinHostEl = null,
+  twinLastSite = null;
 function twinDevices() {
   return state.devices.map((d) => {
     const alarm = state.alarms.find((a) => a.device === d.id && a.status !== "已关闭");
@@ -1711,7 +1712,11 @@ function twinSync() {
     window.DEMO = window.DEMO || {};
     window.DEMO.twin = twinCtrl;
   } else twinCtrl.setDevices(twinDevices());
-  if (state.site !== "all") twinCtrl.teleport(state.site);
+  // 只在站点模式切换时瞬移，避免打断用户漫游
+  if (state.site !== twinLastSite) {
+    twinCtrl.teleport(state.site === "all" ? "all" : state.site);
+    twinLastSite = state.site;
+  }
 }
 function twinTeardown() {
   if (twinCtrl) {
@@ -1719,6 +1724,7 @@ function twinTeardown() {
     twinCtrl = null;
   }
   twinHostEl = null;
+  twinLastSite = null;
 }
 function twinGo(site) {
   state.site = site;
