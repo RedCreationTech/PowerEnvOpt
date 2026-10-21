@@ -17,6 +17,12 @@ const assets = new Set([
   "/workflows.js",
   "/ai-ui.js",
   "/styles.css",
+  "/iso-kit.js",
+  "/iso-kit.css",
+  "/iso-ac.js",
+  "/iso-batt.js",
+  "/iso-pdu.js",
+  "/iso-energy.js",
   "/assets/hongchuang-logo.svg",
   "/assets/hongchuang-mark.svg",
 ]);

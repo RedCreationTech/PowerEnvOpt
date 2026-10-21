@@ -603,6 +603,7 @@ async function wikiLint() {
   }
 }
 modules.push(["evaluation", "独立评测", ""]);
+modules.push(["scenarios", "场景演示", ""]);
 subtitles.evaluation =
   "真实模型评测与固定规则基线分开报告；合成测试不能冒充现场指标验收。";
 for (const id of ["admin", "analyst", "supervisor"])

@@ -1987,3 +1987,56 @@ details.card > summary {
     flex-basis: 100%;
   }
 }
+
+/* —— 机理示意图（iso-*.js 挂载产物，依赖 iso-kit.css 的 .iso 主题变量）—— */
+.case-fig {
+  max-width: 560px;
+  margin: 4px auto 8px;
+}
+.fig-timeline button.active {
+  background: #2f6df6;
+  border-color: #2f6df6;
+  color: #fff;
+}
+
+/* —— AI 演示基线指标卡（场景演示 / 机理示意 tab）—— */
+.ai-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.ai-chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid #d5deeb;
+  font-size: 13px;
+}
+.ai-chip b {
+  font-size: 12px;
+  color: #61728c;
+}
+.ai-chip small {
+  color: #93a3bd;
+}
+.ai-chip.pass {
+  background: #eef8f2;
+  border-color: #bfe6d2;
+}
+.ai-chip.pass b {
+  color: #159883;
+}
+.ai-chip.miss {
+  background: #fdf3f1;
+  border-color: #f2cdc4;
+}
+.ai-chip.miss b {
+  color: #c4543a;
+}
+.highlight-grid button.active {
+  border-color: #2f6df6;
+  box-shadow: 0 0 0 1px #2f6df6;
+}

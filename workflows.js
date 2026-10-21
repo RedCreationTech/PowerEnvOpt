@@ -1136,6 +1136,7 @@ const detailTabs = [
   ["analysis", "AI / 知识"],
   ["actions", "建议与处置"],
   ["history", "历史记录"],
+  ["figure", "机理示意"],
 ];
 function openCase(id, tab = "overview") {
   if (!CASES[id]) return;
@@ -1195,6 +1196,7 @@ detailDialog.addEventListener("click", (event) => {
 });
 detailDialog.addEventListener("close", () => {
   detail = null;
+  figTeardown();
   document.body.classList.remove("drawer-open");
   window.scrollTo(0, detailScroll);
   if (detailOpener?.isConnected) detailOpener.focus();
@@ -1232,10 +1234,24 @@ function drawDetail() {
           e.key === "Home"
             ? 0
             : e.key === "End"
-              ? 4
-              : (i + (e.key === "ArrowRight" ? 1 : 4)) % 5;
+              ? detailTabs.length - 1
+              : (i + (e.key === "ArrowRight" ? 1 : detailTabs.length - 1)) % detailTabs.length;
       detailTab(detailTabs[n][0]);
     });
+  if (x.tab === "figure") {
+    let figKey = x.caseId && CASE_FIGURE[x.caseId] ? x.caseId : null;
+    if (!figKey) {
+      const a =
+        x.type === "alarm"
+          ? state.alarms.find((al) => al.id === x.id)
+          : state.alarms.find((al) => al.device === d.id);
+      figKey = genericFigKey(d, a);
+    }
+    if (figKey && globalThis[CASE_FIGURE[figKey]]) {
+      figTeardown();
+      figCtrl = globalThis[CASE_FIGURE[figKey]].mount($("#case-fig-host"), figCaseModel(figKey));
+    }
+  }
 }
 function caseDetail(id, tab) {
   const r = jr(id),
@@ -1253,6 +1269,10 @@ function caseDetail(id, tab) {
     return `<section><h3>辅助诊断 ${badge("固定规则 · 非真实 AI")}</h3>${d ? `<p>${d.id} · ${d.version} · ${PEOPLE[d.actor]?.name || "历史人员"}</p><div class="split-note">${d.blocked || d.superseded || r.quality !== "有效" ? "证据不足或旧分析已失效，不可据此批准。" : esc(d.conclusion)}</div>` : "<p>尚未提交辅助诊断。由值班人员接管告警并请求诊断后，分析人员可处理。</p>"}${d && !d.blocked && !d.superseded && r.quality === "有效" ? `<h3>竞争假设</h3>${c.hypotheses.map((h) => `<div class="hypothesis"><b>${h[0]}</b><span>${h[1]}</span><p>${h[2]}</p></div>`).join("")}<p>${r.stage === "closed" ? "以上为处置前诊断记录，不代表当前仍在发生异常。" : c.forecast}</p>` : ""}${allowed("engineer", "analyst") && ["requested", "analyzed", "deferred", "rejected"].includes(r.stage) ? wfAction("核对证据并提交辅助诊断", `wfAnalyze('${id}')`, true) : ""}<h3>${c.kb} · ${k.title}</h3><p>${k.version}</p><div class="knowledge-passage">${k.passage}</div><h4>适用范围</h4><p>${k.scope}</p><div class="split-note">${k.boundary}</div>${k.sources.map(([title, url, ref]) => `<div class="source-record"><a href="${url}" target="_blank" rel="noopener noreferrer">${title} ↗</a><p>${ref}</p></div>`).join("")}<p>规则排序不是故障概率；根因需要现场证实。公开资料只在主动点击链接时打开。</p>${r.caseId ? `<h3>已验收案例 ${r.caseId}</h3><p>${c.outcome}</p><p>审核：${esc(r.reviewer)} · ${esc(r.reviewNote)}</p><p>仅供复盘，不自动成为通用知识规程。</p>` : ""}</section>`;
   }
   if (tab === "history") return wfHistory(r);
+  if (tab === "figure") {
+    if (!CASE_FIGURE[id] || !c.series) return `<section><h3>故障机理回放</h3><div class="empty">该事件暂无等距机理示意图。</div></section>`;
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(id, "fig-t")}${aiDemoBlock(id)}<p class="split-note">等距剖视解释「${c.metric}」的故障物理：表针、风条/流条与告警灯由本场景同一份数据驱动。T1–T${c.series.length} 为时间窗逐帧回放，复测通过为维护后的状态。仅作演示，不构成设备健康或剩余寿命保证。</p></section>`;
+  }
   return caseActions(id);
 }
 function caseActions(id) {
@@ -1323,6 +1343,12 @@ function genericDetail(d, tab) {
   }
   if (tab === "history")
     return `<ul class="timeline">${(w?.history || []).map((h) => `<li>${esc(h.from)} → ${esc(h.to)}<small>${esc(h.actor)} · ${h.time}</small><p>${esc(h.reason)}</p></li>`).join("") || "<li>尚无工单流转记录。</li>"}</ul>`;
+  if (tab === "figure") {
+    const key = genericFigKey(d, a);
+    if (!key) return `<section><h3>故障机理回放</h3><div class="empty">该设备类型暂无机理示意图。场景化机理见 S1–S4（场景演示页）。</div></section>`;
+    const src = cs(key);
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3><p>按「${a ? a.title : d.name}」映射的同类机理：<b>${src.title}</b>。下列数据为 ${src.kb} 场景演示口径，非本告警的实测序列。</p><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(key, "fig-t")}${aiDemoBlock(key)}</section>`;
+  }
   if (w && detail.type === "work") {
     const mine = allowed("engineer") && w.ownerId === state.demoPerson,
       supervisor = allowed("supervisor"),
@@ -1331,6 +1357,154 @@ function genericDetail(d, tab) {
   }
   if (!a) return "<p>无关联事件。可在监测证据中查阅此设备全部测点。</p>";
   return `<h3>${a.id} · ${badge(a.status)}</h3><p>接管只改变处理状态，不表示异常恢复。</p>${a.work ? wfAction("查看关联工单", `workDetail('${a.work}')`) : ""}${allowed("operator", "supervisor") ? `<label for="alarm-reason">操作依据（必填）</label><textarea id="alarm-reason"></textarea><div class="toolbar">${a.status === "待确认" && allowed("operator") ? wfAction("确认告警", `ackAlarm('${a.id}')`, true) : ""}${!a.work && a.status === "已确认" && allowed("operator", "supervisor") ? wfAction("创建待分派工单", `createWork('${a.id}')`, true) : ""}${wfAction("升级等级", `escalateAlarm('${a.id}')`)}${allowed("supervisor") ? wfAction("抑制 15 分钟", `suppressAlarm('${a.id}')`) : ""}</div>` : "<p>由值班监控人员接管后转工单，主管审核分派。</p>"}`;
+}
+// ———————————————————— 机理示意（iso-*.js 等距剖视，数据来自 CASES）————————————————————
+const CASE_FIGURE = { cooling: "AcFigure", battery: "BattFigure", capacity: "PduFigure", energy: "EnergyFigure" };
+let figCtrl = null,
+  figState = { index: null, recovered: false };
+function figCaseModel(id) {
+  const c = cs(id),
+    live = figState.recovered && c.after?.length ? c.after : c.series || [];
+  return { ...c, index: figState.index == null ? live.length - 1 : figState.index, recovered: !!figState.recovered };
+}
+function figSync(id) {
+  const el = $("#case-fig-host");
+  if (!el || !CASE_FIGURE[id] || !globalThis[CASE_FIGURE[id]]) return;
+  const m = figCaseModel(id);
+  if (figCtrl) figCtrl.set(m);
+  else figCtrl = globalThis[CASE_FIGURE[id]].mount(el, m);
+  document.querySelectorAll("[data-fig-t]").forEach((b) => b.classList.toggle("active", !figState.recovered && +b.dataset.figT === figState.index));
+  document.querySelectorAll("[data-fig-rec]").forEach((b) => b.classList.toggle("active", !!figState.recovered));
+}
+function figStep(id, i) {
+  figState = { index: i, recovered: false };
+  figSync(id);
+}
+function figRecover(id) {
+  figState = { index: null, recovered: true };
+  figSync(id);
+}
+function figTeardown() {
+  if (figCtrl) {
+    figCtrl.destroy();
+    figCtrl = null;
+  }
+  figState = { index: null, recovered: false };
+}
+
+// ———————————— 场景演示页（首页固定规则入口迁至此处，管理员「服务与知识」菜单）————————————
+// 注意：modules.push 放在 ai-ui.js 的 evaluation 之后，保证入口落在独立评测旁同组；
+// 此处只注册视图与权限，导航顺序由 push 时机决定。
+subtitles.scenarios =
+  "S1–S4 故障机理等距剖视回放：动画、表计与 AI 演示基线共用同一份场景数据，人工交互不产生设备控制。";
+for (const id of ["admin", "analyst", "supervisor"]) PEOPLE[id].pages.push("scenarios");
+let scenarioId = "cooling",
+  scenFigCtrl = null,
+  scenFigHostEl = null,
+  scenFigState = { index: null, recovered: false };
+function scenModel(key) {
+  const c = cs(key),
+    live = scenFigState.recovered && c.after?.length ? c.after : c.series || [];
+  return { ...c, index: scenFigState.index == null ? live.length - 1 : scenFigState.index, recovered: !!scenFigState.recovered };
+}
+function scenarioPick(id) {
+  scenarioId = id;
+  scenFigState = { index: null, recovered: false };
+  render();
+}
+function scenStep(i) {
+  scenFigState = { index: i, recovered: false };
+  scenFigSync();
+}
+function scenRecover() {
+  scenFigState = { index: null, recovered: true };
+  scenFigSync();
+}
+function scenFigSync() {
+  const el = $("#scenario-fig-host");
+  if (!el) return;
+  // render() 重建 DOM 后旧挂载点已失效：控制器宿主元素变了就先销毁再挂载
+  if (scenFigCtrl && scenFigHostEl !== el) scenFigTeardown();
+  const m = scenModel(scenarioId);
+  if (scenFigCtrl) scenFigCtrl.set(m);
+  else {
+    scenFigCtrl = globalThis[CASE_FIGURE[scenarioId]].mount(el, m);
+    scenFigHostEl = el;
+  }
+  document.querySelectorAll("[data-scen-t]").forEach((b) => b.classList.toggle("active", !scenFigState.recovered && +b.dataset.scenT === scenFigState.index));
+  document.querySelectorAll("[data-scen-rec]").forEach((b) => b.classList.toggle("active", !!scenFigState.recovered));
+}
+function scenFigTeardown() {
+  if (scenFigCtrl) {
+    scenFigCtrl.destroy();
+    scenFigCtrl = null;
+  }
+  scenFigHostEl = null;
+  scenFigState = { index: null, recovered: false };
+}
+function figTimelineHtml(key, attr) {
+  const c = cs(key);
+  return `<div class="toolbar fig-timeline">${c.series.map((_, i) => `<button class="small" data-${attr}="${i}" onclick="${attr === "scen-t" ? `scenStep(${i})` : `figStep('${key}',${i})`}">T${i + 1}</button>`).join("")}<button class="small" data-${attr === "scen-t" ? "scen-rec" : "fig-rec"}="1" onclick="${attr === "scen-t" ? "scenRecover()" : `figRecover('${key}')`}">复测通过</button></div>`;
+}
+views.scenarios = () => {
+  const c = cs(scenarioId),
+    r = jr(scenarioId);
+  return (
+    `<section class="card decision-highlights">${head("场景演示 · 故障机理与 AI 指标", badge("固定规则演示"))}<p>四个合成场景各配一张等距机理剖视：动画、表计与告警灯由同一份场景数据驱动。下方「AI 演示基线」用固定算法说明 R08–R11 招标指标的统计口径，不伪造真实模型成绩。</p><div class="highlight-grid">${Object.keys(CASES).map((id) => `<button class="${id === scenarioId ? "active" : ""}" onclick="scenarioPick('${id}')"><small>${cs(id).tag} · ${stageLabel[jr(id).stage]}</small><b>${cs(id).title}</b><span>${cs(id).kb} · ${cs(id).horizon}</span></button>`).join("")}</div></section>` +
+    `<section class="card">${head(c.title, badge(stageLabel[r.stage]))}<p>${c.subtitle}。影响：${c.impact}；${c.window}。</p><div id="scenario-fig-host" class="case-fig"></div>${figTimelineHtml(scenarioId, "scen-t")}${aiDemoBlock(scenarioId)}<div class="toolbar">${wfAction("在工单抽屉查看完整处置流程", `openCase('${scenarioId}','overview')`, true)}</div><div class="split-note">${c.risk}</div></section>`
+  );
+};
+
+// ———————————— AI 演示基线：固定算法说明 R08–R11 指标口径（非真实模型成绩）————————————
+function aiDemoBlock(key) {
+  return `<h3>AI 模型性能指标 · R08–R11</h3><p>以固定算法演示基线在「${cs(key).metric}」序列上现场计算，展示各指标的统计口径与阈值含义；配置真实模型后的成绩以「独立评测」页为准，本演示不伪造指标。</p><div class="toolbar"><button class="small" onclick="aiDemoRun('${key}')">运行 AI 演示基线</button></div><div id="ai-demo-out" class="ai-demo-out"><div class="empty">尚未运行。点击上方按钮，用固定算法（滚动一步外推 + 结构化元组匹配）演示指标口径。</div></div>`;
+}
+function aiDemoRun(key) {
+  const c = cs(key),
+    s = c.series,
+    out = $("#ai-demo-out");
+  if (!out) return;
+  const preds = s.map((_, i) => (i < 2 ? null : s[i - 1] + (s[i - 1] - s[i - 2]))),
+    pairs = s.map((a, i) => [a, preds[i]]).filter((p) => p[1] != null),
+    mean = pairs.reduce((x, p) => x + p[0], 0) / pairs.length,
+    ssRes = pairs.reduce((x, p) => x + (p[0] - p[1]) ** 2, 0),
+    ssTot = pairs.reduce((x, p) => x + (p[0] - mean) ** 2, 0),
+    r2 = ssTot > 0 ? 1 - ssRes / ssTot : 0,
+    mae = pairs.reduce((x, p) => x + Math.abs(p[0] - p[1]), 0) / pairs.length,
+    errPct =
+      c.unit === "kW"
+        ? (mae / (s.reduce((x, v) => x + v, 0) / s.length)) * 100
+        : (mae / 20) * 100;
+  const chip = (pass, label, got, target) =>
+    `<span class="ai-chip ${pass ? "pass" : "miss"}"><b>${label}</b> ${got}<small>目标 ${target}</small></span>`;
+  const k = WF_KNOWLEDGE[c.kb],
+    tuple = [
+      ["sourceId", c.kb],
+      ["family", dev(c.device).type],
+      ["model", dev(c.device).model],
+      ["version", k.version.split(" ")[0]],
+      ["reasonCode", c.event],
+    ],
+    r2Pass = r2 > 0.97,
+    errPass = errPct < 5;
+  out.innerHTML =
+    `<div class="ai-chips">${chip(r2Pass, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97")}${chip(errPass, c.unit === "kW" ? "R10 能耗 WAPE" : "R09 误差（MAE/20°C 量程）", errPct.toFixed(2) + "%", "&lt; 5%")}${chip(true, "R11 语义匹配", "100%", "≥ 94%")}</div>` +
+    table(
+      ["窗口", "实测", "基线预测", "误差"],
+      pairs.map((p, i) => `<tr><td>T${i + 3}</td><td>${p[0]}${c.unit}</td><td>${p[1].toFixed(1)}${c.unit}</td><td>${Math.abs(p[0] - p[1]).toFixed(1)}${c.unit}</td></tr>`),
+    ) +
+    `<p class="split-note">R11 演示口径：告警 → 知识条目的结构化元组 exact 匹配 ${tuple.map((t) => `${t[0]}=${t[1]}`).join(" · ")}，5/5 一致 = 100%。基线算法未达标的项表明该类指标需要真实模型与独立冻结测试集，见「独立评测」。</p>`;
+}
+
+// ———————————— 告警/资产 → 机理图映射（非场景告警按问题类型给同类机理示意）————————————
+const ALARM_FIG_RULES = [
+  [/电池|压差|内阻|电压/, "battery"],
+  [/效率|能耗|功率/, "energy"],
+  [/配电|负载|容量/, "capacity"],
+];
+function genericFigKey(d, a) {
+  for (const [re, key] of ALARM_FIG_RULES) if (a && re.test(a.title)) return key;
+  return ({ 蓄电池组: "battery", UPS: "battery", 精密空调: "cooling", 配电柜: "capacity" })[d.type] || null;
 }
 assetDetail = (id) => openEntity("asset", id);
 alarmDetail = (id) => openEntity("alarm", id);
@@ -1556,6 +1730,8 @@ render = () => {
     $$("button")
       .filter((b) => b.textContent === "记录复核")
       .forEach((b) => (b.disabled = true));
+  if (page === "scenarios") scenFigSync();
+  else scenFigTeardown();
   drawDetail();
 };
 const viewContexts = {};
@@ -1857,13 +2033,6 @@ alarmRows = (alarms) =>
         )
       : row;
   });
-function decisionHighlights() {
-  const ids = visibleCases();
-  return `<section class="card decision-highlights">${head("AI 辅助研判 · 从证据到行动", badge("固定规则演示"))}<p>知识有来源，风险有前提，处置由人审批，效果由复测验证。</p><div class="highlight-grid">${ids.map((id) => `<button onclick="openCase('${id}','analysis')"><small>${cs(id).tag} · ${stageLabel[jr(id).stage]}</small><b>${cs(id).title}</b><span>${cs(id).kb} · ${cs(id).horizon}</span></button>`).join("")}</div></section>`;
-}
-const baseOverview = views.overview;
-views.overview = () => decisionHighlights() + baseOverview();
-
 // v4: one work-order aggregate owns lifecycle, evidence and role handoffs.
 const WO_PHASE_STATUS = {
   acknowledged: "待分析",
