@@ -1271,7 +1271,7 @@ function caseDetail(id, tab) {
   if (tab === "history") return wfHistory(r);
   if (tab === "figure") {
     if (!CASE_FIGURE[id] || !c.series) return `<section><h3>故障机理回放</h3><div class="empty">该事件暂无等距机理示意图。</div></section>`;
-    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(id, "fig-t")}${aiDemoBlock(id)}<p class="split-note">等距剖视解释「${c.metric}」的故障物理：表针、风条/流条与告警灯由本场景同一份数据驱动。T1–T${c.series.length} 为时间窗逐帧回放，复测通过为维护后的状态。仅作演示，不构成设备健康或剩余寿命保证。</p></section>`;
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}<div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(id, "fig-t")}${aiDemoBlock(id)}<p class="split-note">等距剖视解释「${c.metric}」的故障物理：表针、风条/流条与告警灯由本场景同一份数据驱动。T1–T${c.series.length} 为时间窗逐帧回放，复测通过为维护后的状态。仅作演示，不构成设备健康或剩余寿命保证。</p></section>`;
   }
   return caseActions(id);
 }
@@ -1347,7 +1347,7 @@ function genericDetail(d, tab) {
     const key = genericFigKey(d, a);
     if (!key) return `<section><h3>故障机理回放</h3><div class="empty">该设备类型暂无机理示意图。场景化机理见 S1–S4（场景演示页）。</div></section>`;
     const src = cs(key);
-    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3><p>按「${a ? a.title : d.name}」映射的同类机理：<b>${src.title}</b>。下列数据为 ${src.kb} 场景演示口径，非本告警的实测序列。</p><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(key, "fig-t")}${aiDemoBlock(key)}</section>`;
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}<p>按「${a ? a.title : d.name}」映射的同类机理：<b>${src.title}</b>。下列数据为 ${src.kb} 场景演示口径，非本告警的实测序列。</p><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(key, "fig-t")}${aiDemoBlock(key)}</section>`;
   }
   if (w && detail.type === "work") {
     const mine = allowed("engineer") && w.ownerId === state.demoPerson,
@@ -1495,6 +1495,50 @@ function aiDemoRun(key) {
     ) +
     `<p class="split-note">R11 演示口径：告警 → 知识条目的结构化元组 exact 匹配 ${tuple.map((t) => `${t[0]}=${t[1]}`).join(" · ")}，5/5 一致 = 100%。基线算法未达标的项表明该类指标需要真实模型与独立冻结测试集，见「独立评测」。</p>`;
 }
+
+// ———————————— WebGL 3D 数字孪生机房（资产页：漫游 + 点击进机理示意）————————————
+let twinCtrl = null,
+  twinHostEl = null;
+function twinDevices() {
+  return state.devices.map((d) => {
+    const alarm = state.alarms.find((a) => a.device === d.id && a.status !== "已关闭");
+    return { ...d, alarm: !!alarm, alarmTitle: alarm ? alarm.title : "" };
+  });
+}
+function twinSync() {
+  const el = $("#twin3d-host");
+  if (!el || !globalThis.Twin3d) return;
+  if (twinCtrl && twinHostEl !== el) twinTeardown();
+  if (!twinCtrl) {
+    twinCtrl = Twin3d.mount(el, { devices: twinDevices(), onSelect: (id) => openEntity("asset", id, "figure") });
+    twinHostEl = el;
+    window.DEMO = window.DEMO || {};
+    window.DEMO.twin = twinCtrl;
+  } else twinCtrl.setDevices(twinDevices());
+  if (state.site !== "all") twinCtrl.teleport(state.site);
+}
+function twinTeardown() {
+  if (twinCtrl) {
+    twinCtrl.destroy();
+    twinCtrl = null;
+  }
+  twinHostEl = null;
+}
+function twinGo(site) {
+  state.site = site;
+  save();
+  render();
+}
+function twin3dCard() {
+  return `<section class="card twin3d-card">${head("动力机房数字孪生", badge("3D 示意"))}<p>三个站点大厅按真实布局口径示意（每厅 A/B 两个动力机房，各 6 类设备）；点击进入场景后：点击锁定鼠标漫游（360° 视角、WASD 移动、Q/E 升降、Esc 退出），<b>点击任意设备飞到其跟前并打开该设备的机理示意</b>。布局与模型为演示口径。</p><div class="toolbar twin3d-bar">${["all", ...SITES].map((s) => `<button class="small ${state.site === s ? "active" : ""}" onclick="twinGo('${s}')">${s === "all" ? "全部站点" : s}</button>`).join("")}<span class="twin-legend"><i class="lg ok"></i>正常<i class="lg alarm"></i>活动告警<i class="lg off"></i>离线</span></div><div id="twin3d-host"></div></section>`;
+}
+// 机理示意 tab 顶部的活动告警横幅（有未闭环告警时显示）
+function figAlarmBanner(a) {
+  if (!a || a.status === "已关闭") return "";
+  return `<p class="alarm-banner">⚠ 该设备当前存在活动告警：${badge(a.severity)} <b>${esc(a.title)}</b>（${a.id} · ${a.status}）${wfAction("查看告警", `alarmDetail('${a.id}')`)}</p>`;
+}
+const baseAssetsView = views.assets;
+views.assets = () => twin3dCard() + baseAssetsView();
 
 // ———————————— 告警/资产 → 机理图映射（非场景告警按问题类型给同类机理示意）————————————
 const ALARM_FIG_RULES = [
@@ -1732,6 +1776,8 @@ render = () => {
       .forEach((b) => (b.disabled = true));
   if (page === "scenarios") scenFigSync();
   else scenFigTeardown();
+  if (page === "assets") twinSync();
+  else twinTeardown();
   drawDetail();
 };
 const viewContexts = {};

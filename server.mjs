@@ -23,6 +23,8 @@ const assets = new Set([
   "/iso-batt.js",
   "/iso-pdu.js",
   "/iso-energy.js",
+  "/twin3d.js",
+  "/vendor/three.min.js",
   "/assets/hongchuang-logo.svg",
   "/assets/hongchuang-mark.svg",
 ]);
