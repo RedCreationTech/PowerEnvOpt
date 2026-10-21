@@ -15,6 +15,8 @@ const FIGURES = [
   { file: "iso-batt.js", global: "BattFigure", model: { series: [7, 9, 13, 18, 24, 31], after: [26, 18, 11, 7, 5, 4], threshold: 25, index: 5 } },
   { file: "iso-pdu.js", global: "PduFigure", model: { series: [61, 65, 69, 74, 79, 84], after: [77, 71, 66, 63, 62, 62], threshold: 85, planned: 12, index: 5 } },
   { file: "iso-energy.js", global: "EnergyFigure", model: { series: [12, 12.8, 13.9, 15.1, 16.5, 18], after: [17, 16.2, 15.4, 14.3, 13.4, 12.6], threshold: 15, baseline: 12, index: 5 } },
+  { file: "iso-ups.js", global: "UpsFigure", model: { series: [61, 65, 69, 74, 79, 84], after: [77, 71, 66, 63, 62, 62], threshold: 85, planned: 12, index: 5 } },
+  { file: "iso-dg.js", global: "DgFigure", model: { series: [7, 9, 13, 18, 24, 31], after: [26, 18, 11, 7, 5, 4], threshold: 25, recoveredValue: 27.2, index: 5 } },
 ];
 
 const html = readFileSync("manual/iso-preview.html", "utf8");

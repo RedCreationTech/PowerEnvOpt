@@ -1241,17 +1241,20 @@ function drawDetail() {
   if (x.tab === "figure") {
     let figKey = x.caseId && CASE_FIGURE[x.caseId] ? x.caseId : null;
     if (!figKey) {
-      const a =
+      const a0 =
         x.type === "alarm"
           ? state.alarms.find((al) => al.id === x.id)
           : state.alarms.find((al) => al.device === d.id);
-      figKey = genericFigKey(d, a);
+      figKey = genericFigKey(d, a0);
     }
     if (figKey && globalThis[CASE_FIGURE[figKey]]) {
       figTeardown();
       figCtrl = globalThis[CASE_FIGURE[figKey]].mount($("#case-fig-host"), figCaseModel(figKey));
+      // 有活动告警时 AI 自动回放机理（固定节奏演示基线）
+      const act = state.alarms.find((al) => al.device === d.id && al.status !== "已关闭");
+      if (act) figAutoPlay(figKey);
     }
-  }
+  } else figTeardown();
 }
 function caseDetail(id, tab) {
   const r = jr(id),
@@ -1271,7 +1274,7 @@ function caseDetail(id, tab) {
   if (tab === "history") return wfHistory(r);
   if (tab === "figure") {
     if (!CASE_FIGURE[id] || !c.series) return `<section><h3>故障机理回放</h3><div class="empty">该事件暂无等距机理示意图。</div></section>`;
-    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}<div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(id, "fig-t")}${aiDemoBlock(id)}<p class="split-note">等距剖视解释「${c.metric}」的故障物理：表针、风条/流条与告警灯由本场景同一份数据驱动。T1–T${c.series.length} 为时间窗逐帧回放，复测通过为维护后的状态。仅作演示，不构成设备健康或剩余寿命保证。</p></section>`;
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}${figAutoBar(id)}<div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(id, "fig-t")}${aiDemoBlock(id)}<p class="split-note">等距剖视解释「${c.metric}」的故障物理：表针、风条/流条与告警灯由本场景同一份数据驱动。T1–T${c.series.length} 为时间窗逐帧回放，复测通过为维护后的状态。存在活动告警时自动按时间窗播放；也可点「AI 自动回放」重新播放。仅作演示，不构成设备健康或剩余寿命保证。</p></section>`;
   }
   return caseActions(id);
 }
@@ -1346,8 +1349,8 @@ function genericDetail(d, tab) {
   if (tab === "figure") {
     const key = genericFigKey(d, a);
     if (!key) return `<section><h3>故障机理回放</h3><div class="empty">该设备类型暂无机理示意图。场景化机理见 S1–S4（场景演示页）。</div></section>`;
-    const src = cs(key);
-    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}<p>按「${a ? a.title : d.name}」映射的同类机理：<b>${src.title}</b>。下列数据为 ${src.kb} 场景演示口径，非本告警的实测序列。</p><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(key, "fig-t")}${aiDemoBlock(key)}</section>`;
+    const src = figCase(key);
+    return `<section><h3>故障机理回放 ${badge("演示口径")}</h3>${figAlarmBanner(a)}${figAutoBar(key)}<p>按「${a ? a.title : d.name}」映射的同类机理：<b>${src.title}</b>。下列数据为 ${src.kb} 场景演示口径，非本告警的实测序列。</p><div id="case-fig-host" class="case-fig"></div>${figTimelineHtml(key, "fig-t")}${aiDemoBlock(key)}</section>`;
   }
   if (w && detail.type === "work") {
     const mine = allowed("engineer") && w.ownerId === state.demoPerson,
@@ -1359,13 +1362,21 @@ function genericDetail(d, tab) {
   return `<h3>${a.id} · ${badge(a.status)}</h3><p>接管只改变处理状态，不表示异常恢复。</p>${a.work ? wfAction("查看关联工单", `workDetail('${a.work}')`) : ""}${allowed("operator", "supervisor") ? `<label for="alarm-reason">操作依据（必填）</label><textarea id="alarm-reason"></textarea><div class="toolbar">${a.status === "待确认" && allowed("operator") ? wfAction("确认告警", `ackAlarm('${a.id}')`, true) : ""}${!a.work && a.status === "已确认" && allowed("operator", "supervisor") ? wfAction("创建待分派工单", `createWork('${a.id}')`, true) : ""}${wfAction("升级等级", `escalateAlarm('${a.id}')`)}${allowed("supervisor") ? wfAction("抑制 15 分钟", `suppressAlarm('${a.id}')`) : ""}</div>` : "<p>由值班监控人员接管后转工单，主管审核分派。</p>"}`;
 }
 // ———————————————————— 机理示意（iso-*.js 等距剖视，数据来自 CASES）————————————————————
-const CASE_FIGURE = { cooling: "AcFigure", battery: "BattFigure", capacity: "PduFigure", energy: "EnergyFigure" };
+const CASE_FIGURE = { cooling: "AcFigure", battery: "BattFigure", capacity: "PduFigure", energy: "EnergyFigure", ups: "UpsFigure", dg: "DgFigure" };
+// 新图复用既有 CASE 数据做驱动：ups ← 容量场景（负载率%）、dg ← 电池场景（数值按 V 呈现）
+const FIG_MODEL = { ups: "capacity", dg: "battery" };
+function figCase(key) {
+  const base = cs(FIG_MODEL[key] || key);
+  if (key === "dg") return { ...base, unit: "V", metric: "启动蓄电池电压" };
+  if (key === "ups") return { ...base, metric: "UPS 负载率" };
+  return base;
+}
 let figCtrl = null,
   figState = { index: null, recovered: false };
-function figCaseModel(id) {
-  const c = cs(id),
+function figCaseModel(key) {
+  const c = figCase(key),
     live = figState.recovered && c.after?.length ? c.after : c.series || [];
-  return { ...c, index: figState.index == null ? live.length - 1 : figState.index, recovered: !!figState.recovered };
+  return { ...c, index: figState.index == null ? live.length - 1 : figState.index, recovered: !!figState.recovered, recoveredValue: key === "dg" ? 27.2 : c.recoveredValue };
 }
 function figSync(id) {
   const el = $("#case-fig-host");
@@ -1377,14 +1388,57 @@ function figSync(id) {
   document.querySelectorAll("[data-fig-rec]").forEach((b) => b.classList.toggle("active", !!figState.recovered));
 }
 function figStep(id, i) {
+  stopFigAuto();
   figState = { index: i, recovered: false };
   figSync(id);
 }
 function figRecover(id) {
+  stopFigAuto();
   figState = { index: null, recovered: true };
   figSync(id);
 }
+// 自动回放：按时间窗逐帧播放异常发展 → 维护后复测态（纯演示动效，固定节奏，非 AI 推理）
+let figAutoTimer = 0,
+  figAutoKey = null;
+function stopFigAuto() {
+  if (figAutoTimer) {
+    clearTimeout(figAutoTimer);
+    figAutoTimer = 0;
+  }
+  figAutoKey = null;
+  const b = document.querySelector("[data-fig-auto]");
+  if (b) b.style.display = "none";
+}
+function figAutoPlay(key) {
+  stopFigAuto();
+  const c = figCase(key),
+    n = c.series.length;
+  figAutoKey = key;
+  const badge = document.querySelector("[data-fig-auto]");
+  if (badge) badge.style.display = "";
+  let i = 0;
+  figState = { index: 0, recovered: false };
+  figSync(key);
+  const step = () => {
+    if (figAutoKey !== key) return;
+    i++;
+    if (i < n) {
+      figState = { index: i, recovered: false };
+      figSync(key);
+      figAutoTimer = setTimeout(step, 1100);
+    } else {
+      figState = { index: null, recovered: true };
+      figSync(key);
+      figAutoTimer = setTimeout(() => stopFigAuto(), 1200);
+    }
+  };
+  figAutoTimer = setTimeout(step, 1100);
+}
+function figAutoBar(key) {
+  return `<div class="toolbar"><button class="small" onclick="figAutoPlay('${key}')">▶ 自动回放</button><span data-fig-auto class="badge info" style="display:none">回放中…</span></div>`;
+}
 function figTeardown() {
+  stopFigAuto();
   if (figCtrl) {
     figCtrl.destroy();
     figCtrl = null;
@@ -1403,7 +1457,7 @@ let scenarioId = "cooling",
   scenFigHostEl = null,
   scenFigState = { index: null, recovered: false };
 function scenModel(key) {
-  const c = cs(key),
+  const c = figCase(key),
     live = scenFigState.recovered && c.after?.length ? c.after : c.series || [];
   return { ...c, index: scenFigState.index == null ? live.length - 1 : scenFigState.index, recovered: !!scenFigState.recovered };
 }
@@ -1443,7 +1497,7 @@ function scenFigTeardown() {
   scenFigState = { index: null, recovered: false };
 }
 function figTimelineHtml(key, attr) {
-  const c = cs(key);
+  const c = figCase(key);
   return `<div class="toolbar fig-timeline">${c.series.map((_, i) => `<button class="small" data-${attr}="${i}" onclick="${attr === "scen-t" ? `scenStep(${i})` : `figStep('${key}',${i})`}">T${i + 1}</button>`).join("")}<button class="small" data-${attr === "scen-t" ? "scen-rec" : "fig-rec"}="1" onclick="${attr === "scen-t" ? "scenRecover()" : `figRecover('${key}')`}">复测通过</button></div>`;
 }
 views.scenarios = () => {
@@ -1457,26 +1511,35 @@ views.scenarios = () => {
 
 // ———————————— AI 演示基线：固定算法说明 R08–R11 指标口径（非真实模型成绩）————————————
 function aiDemoBlock(key) {
-  return `<h3>AI 模型性能指标 · R08–R11</h3><p>以固定算法演示基线在「${cs(key).metric}」序列上现场计算，展示各指标的统计口径与阈值含义；配置真实模型后的成绩以「独立评测」页为准，本演示不伪造指标。</p><div class="toolbar"><button class="small" onclick="aiDemoRun('${key}')">运行 AI 演示基线</button></div><div id="ai-demo-out" class="ai-demo-out"><div class="empty">尚未运行。点击上方按钮，用固定算法（滚动一步外推 + 结构化元组匹配）演示指标口径。</div></div>`;
+  return `<h3>AI 模型性能指标 · R08–R11</h3><p>以固定算法演示基线在「${figCase(key).metric}」序列上现场计算，展示各指标的统计口径与阈值含义；<b>「实测」列可直接编辑</b>——代入你自己的窗口观测值，基线会实时重算指标。点「用已配置模型预测」会让真实大模型以前半程窗口为上下文预测后半程（显式调用、可能产生费用），与基线并排对照；成绩口径以「独立评测」页为准，本演示不伪造指标。</p><div class="toolbar"><button class="small" onclick="aiDemoRun('${key}')">运行 AI 演示基线</button><button class="small" onclick="aiModelPredict('${key}')">用已配置模型预测（真实调用）</button><span data-ai-model-status class="badge info" style="display:none"></span></div><div id="ai-demo-out" class="ai-demo-out"><div class="empty">尚未运行。点击上方按钮，用固定算法（滚动一步外推 + 结构化元组匹配）演示指标口径。</div></div>`;
 }
-function aiDemoRun(key) {
-  const c = cs(key),
-    s = c.series,
-    out = $("#ai-demo-out");
-  if (!out) return;
+function aiDemoCompute(s) {
   const preds = s.map((_, i) => (i < 2 ? null : s[i - 1] + (s[i - 1] - s[i - 2]))),
     pairs = s.map((a, i) => [a, preds[i]]).filter((p) => p[1] != null),
     mean = pairs.reduce((x, p) => x + p[0], 0) / pairs.length,
     ssRes = pairs.reduce((x, p) => x + (p[0] - p[1]) ** 2, 0),
     ssTot = pairs.reduce((x, p) => x + (p[0] - mean) ** 2, 0),
     r2 = ssTot > 0 ? 1 - ssRes / ssTot : 0,
-    mae = pairs.reduce((x, p) => x + Math.abs(p[0] - p[1]), 0) / pairs.length,
-    errPct =
-      c.unit === "kW"
-        ? (mae / (s.reduce((x, v) => x + v, 0) / s.length)) * 100
-        : (mae / 20) * 100;
+    mae = pairs.reduce((x, p) => x + Math.abs(p[0] - p[1]), 0) / pairs.length;
+  return { preds, pairs, r2, mae };
+}
+function aiDemoErrPct(c, s, mae) {
+  return c.unit === "kW"
+    ? (mae / (s.reduce((x, v) => x + v, 0) / s.length)) * 100
+    : (mae / 20) * 100;
+}
+function aiDemoChips(c, r2, errPct) {
   const chip = (pass, label, got, target) =>
     `<span class="ai-chip ${pass ? "pass" : "miss"}"><b>${label}</b> ${got}<small>目标 ${target}</small></span>`;
+  return `${chip(r2 > 0.97, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97")}${chip(errPct < 5, c.unit === "kW" ? "R10 能耗 WAPE" : "R09 误差（MAE/20°C 量程）", errPct.toFixed(2) + "%", "&lt; 5%")}${chip(true, "R11 语义匹配", "100%", "≥ 94%")}`;
+}
+function aiDemoRun(key) {
+  const c = figCase(key),
+    s = c.series,
+    out = $("#ai-demo-out");
+  if (!out) return;
+  const m = aiDemoCompute(s),
+    errPct = aiDemoErrPct(c, s, m.mae);
   const k = WF_KNOWLEDGE[c.kb],
     tuple = [
       ["sourceId", c.kb],
@@ -1484,16 +1547,139 @@ function aiDemoRun(key) {
       ["model", dev(c.device).model],
       ["version", k.version.split(" ")[0]],
       ["reasonCode", c.event],
-    ],
-    r2Pass = r2 > 0.97,
-    errPass = errPct < 5;
+    ];
   out.innerHTML =
-    `<div class="ai-chips">${chip(r2Pass, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97")}${chip(errPass, c.unit === "kW" ? "R10 能耗 WAPE" : "R09 误差（MAE/20°C 量程）", errPct.toFixed(2) + "%", "&lt; 5%")}${chip(true, "R11 语义匹配", "100%", "≥ 94%")}</div>` +
+    `<div class="ai-chips" id="ai-chips">${aiDemoChips(c, m.r2, errPct)}</div>` +
     table(
-      ["窗口", "实测", "基线预测", "误差"],
-      pairs.map((p, i) => `<tr><td>T${i + 3}</td><td>${p[0]}${c.unit}</td><td>${p[1].toFixed(1)}${c.unit}</td><td>${Math.abs(p[0] - p[1]).toFixed(1)}${c.unit}</td></tr>`),
+      ["窗口", "实测（可编辑）", "基线预测", "误差"],
+      m.pairs.map((p, j) => {
+        const i = j + 2;
+        return `<tr><td>T${i + 1}</td><td><input class="ai-act" data-ai-act="${i}" type="number" step="any" value="${p[0]}" oninput="aiDemoRecompute('${key}')" aria-label="T${i + 1} 实测值"></td><td data-ai-p="${i}">${p[1].toFixed(1)}${c.unit}</td><td data-ai-e="${i}">${Math.abs(p[0] - p[1]).toFixed(1)}${c.unit}</td></tr>`;
+      }),
     ) +
-    `<p class="split-note">R11 演示口径：告警 → 知识条目的结构化元组 exact 匹配 ${tuple.map((t) => `${t[0]}=${t[1]}`).join(" · ")}，5/5 一致 = 100%。基线算法未达标的项表明该类指标需要真实模型与独立冻结测试集，见「独立评测」。</p>`;
+    `<p class="split-note">R11 演示口径：告警 → 知识条目的结构化元组 exact 匹配 ${tuple.map((t) => `${t[0]}=${t[1]}`).join(" · ")}，5/5 一致 = 100%。非法/留空的实测输入按场景默认值计。基线算法未达标的项表明该类指标需要真实模型与独立冻结测试集，见「独立评测」。</p>`;
+}
+// 实测列被编辑时只增量重算（不重建输入框，保住焦点），实时刷新指标与预测/误差列
+function aiDemoRecompute(key) {
+  const c = figCase(key),
+    s = c.series.map((v, i) => {
+      const el = document.querySelector(`[data-ai-act="${i}"]`);
+      if (!el) return v;
+      const n = parseFloat(el.value);
+      return Number.isFinite(n) ? n : v;
+    }),
+    m = aiDemoCompute(s),
+    errPct = aiDemoErrPct(c, s, m.mae);
+  const chips = $("#ai-chips");
+  if (chips) chips.innerHTML = aiDemoChips(c, m.r2, errPct);
+  m.preds.forEach((p, i) => {
+    if (p == null) return;
+    const pc = document.querySelector(`[data-ai-p="${i}"]`),
+      ec = document.querySelector(`[data-ai-e="${i}"]`);
+    if (pc) pc.textContent = p.toFixed(1) + c.unit;
+    if (ec) ec.textContent = Math.abs(s[i] - p).toFixed(1) + c.unit;
+  });
+}
+// —— 真实模型预测：/api/predict 显式调用用户已配置的大模型；未配置时明确提示，不回退伪造 ——
+async function figAiPost(path, body) {
+  const s = await (await fetch("/api/session", { credentials: "same-origin" })).json();
+  const r = await fetch(path, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": s.csrfToken },
+    body: JSON.stringify(body),
+  });
+  let data = null;
+  try {
+    data = await r.json();
+  } catch {}
+  if (!r.ok) {
+    const e = new Error((data && data.error && (data.error.message || data.error)) || `服务错误 ${r.status}`);
+    e.status = r.status;
+    throw e;
+  }
+  return data;
+}
+async function aiModelPredict(key) {
+  const c = figCase(key),
+    n = c.series.length,
+    half = Math.max(2, Math.ceil(n / 2)),
+    prefix = c.series.slice(0, half),
+    targets = n - half;
+  const status = document.querySelector("[data-ai-model-status]"),
+    setStatus = (t, bad) => {
+      if (!status) return;
+      status.style.display = t ? "" : "none";
+      status.textContent = t || "";
+      status.className = "badge " + (bad ? "warn" : "info");
+    };
+  setStatus("模型预测中…（真实调用，可能产生费用）");
+  try {
+    const out = await figAiPost("/api/predict", {
+      prefix,
+      targets,
+      unit: c.unit,
+      context: `动环演示场景「${c.title || c.metric}」：前 ${half} 个时间窗为已知观测，请预测后续 ${targets} 个窗口的${c.metric}。`,
+    });
+    aiModelRender(key, out);
+    setStatus(`模型预测完成 · ${out.model || "已配置模型"}`);
+    setTimeout(() => setStatus(""), 5000);
+  } catch (e) {
+    const unconfigured = e.status === 409 || /NOT_CONFIGURED|未配置/.test(e.message);
+    setStatus(unconfigured ? "未配置模型：请到「接入配置」页填写 API 后重试（当前仅固定基线）" : "模型调用失败：" + e.message, true);
+  }
+}
+function aiModelRender(key, out) {
+  const c = figCase(key),
+    preds = out.result.predictions,
+    s = c.series,
+    half = Math.max(2, Math.ceil(s.length / 2)),
+    // 模型成绩：以后半程实测为基准算 R² 与误差
+    pairs = preds.map((p, j) => [s[half + j], p]),
+    mean = pairs.reduce((x, p) => x + p[0], 0) / pairs.length,
+    ssRes = pairs.reduce((x, p) => x + (p[0] - p[1]) ** 2, 0),
+    ssTot = pairs.reduce((x, p) => x + (p[0] - mean) ** 2, 0),
+    r2 = ssTot > 0 ? 1 - ssRes / ssTot : 0,
+    mae = pairs.reduce((x, p) => x + Math.abs(p[0] - p[1]), 0) / pairs.length;
+  const head = document.querySelector("#ai-demo-out thead tr");
+  if (head && !head.querySelector("[data-ai-mh]")) {
+    const th = document.createElement("th");
+    th.setAttribute("data-ai-mh", "1");
+    th.textContent = "模型预测";
+    head.insertBefore(th, head.children[2]);
+  }
+  const rows = document.querySelectorAll("#ai-demo-out tbody tr");
+  rows.forEach((tr, j) => {
+    tr.querySelector("[data-ai-m]")?.remove();
+    const i = j + 2, // 该行实测索引：模型只预测上下文（前 half 窗）之后的窗口
+      p = i >= half ? preds[i - half] : null;
+    const td = document.createElement("td");
+    td.setAttribute("data-ai-m", String(j));
+    td.textContent = Number.isFinite(p) ? Number(p).toFixed(1) + c.unit : "—";
+    tr.insertBefore(td, tr.children[2]);
+  });
+  let mchips = document.getElementById("ai-model-chips");
+  if (!mchips) {
+    mchips = document.createElement("div");
+    mchips.id = "ai-model-chips";
+    mchips.className = "ai-chips";
+    document.getElementById("ai-chips")?.after(mchips);
+  }
+  const chip = (pass, label, got, target) =>
+    `<span class="ai-chip ${pass ? "pass" : "miss"}"><b>${label}</b> ${got}<small>目标 ${target}</small></span>`;
+  const errPct = aiDemoErrPct(c, s, mae);
+  mchips.innerHTML =
+    `<span class="badge info">模型成绩（后半程 ${preds.length} 窗）</span>` +
+    chip(r2 > 0.97, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97") +
+    chip(errPct < 5, c.unit === "kW" ? "R10 能耗 WAPE" : "R09 误差", errPct.toFixed(2) + "%", "&lt; 5%");
+  let note = document.getElementById("ai-model-note");
+  if (!note) {
+    note = document.createElement("p");
+    note.id = "ai-model-note";
+    note.className = "split-note";
+    mchips.after(note);
+  }
+  note.textContent = `模型依据：${out.result.reason}（${out.model || "模型"} · 用量 ${out.usage?.total_tokens ?? "?"} tokens · ${out.durationMs ?? "?"} ms）。协议：模型以前 ${half} 窗为上下文一次性外推后 ${preds.length} 窗；基线为滚动一步外推（逐窗用实测修正），两者信息量不同，成绩仅作口径演示。`;
 }
 
 // ———————————— WebGL 3D 数字孪生机房（资产页：漫游 + 点击进机理示意）————————————
@@ -1540,15 +1726,15 @@ function figAlarmBanner(a) {
 const baseAssetsView = views.assets;
 views.assets = () => twin3dCard() + baseAssetsView();
 
-// ———————————— 告警/资产 → 机理图映射（非场景告警按问题类型给同类机理示意）————————————
-const ALARM_FIG_RULES = [
-  [/电池|压差|内阻|电压/, "battery"],
-  [/效率|能耗|功率/, "energy"],
-  [/配电|负载|容量/, "capacity"],
-];
+// ———————————— 告警/资产 → 机理图映射：设备类型优先，同类机理不再错配 ————————————
 function genericFigKey(d, a) {
-  for (const [re, key] of ALARM_FIG_RULES) if (a && re.test(a.title)) return key;
-  return ({ 蓄电池组: "battery", UPS: "battery", 精密空调: "cooling", 配电柜: "capacity" })[d.type] || null;
+  // 设备类型优先：每类设备配专属机理图；无图类型走空状态，不硬凑
+  if (d.type === "精密空调") return a && /效率|能耗|功率/.test(a.title) ? "energy" : "cooling";
+  if (d.type === "蓄电池组") return "battery";
+  if (d.type === "UPS") return "ups";
+  if (d.type === "配电柜") return "pdu";
+  if (d.type === "柴油发电机") return "dg";
+  return null;
 }
 assetDetail = (id) => openEntity("asset", id);
 alarmDetail = (id) => openEntity("alarm", id);

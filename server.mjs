@@ -9,7 +9,7 @@ import {
   redactConfig,
   SafeError,
 } from "./server/config.mjs";
-import { invokeModel, invokeStructured, ACTIONS } from "./server/ai.mjs";
+import { invokeModel, invokeStructured, invokePredict, ACTIONS } from "./server/ai.mjs";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const assets = new Set([
   "/index.html",
@@ -23,6 +23,8 @@ const assets = new Set([
   "/iso-batt.js",
   "/iso-pdu.js",
   "/iso-energy.js",
+  "/iso-ups.js",
+  "/iso-dg.js",
   "/twin3d.js",
   "/vendor/three.min.js",
   "/assets/hongchuang-logo.svg",
@@ -66,6 +68,7 @@ export function createAppServer({
   wiki = null,
   evaluation = null,
   model = invokeModel,
+  predictFn = invokePredict,
 } = {}) {
   const csrf = randomBytes(32).toString("hex");
   let active = 0;
@@ -185,6 +188,7 @@ export function createAppServer({
       if (
         [
           "POST /api/ai",
+          "POST /api/predict",
           "POST /api/connection/test",
           "POST /api/evaluation/run",
           "POST /api/wiki/compile",
@@ -242,6 +246,17 @@ export function createAppServer({
                 query:
                   "连接测试。只返回 summary:连接成功, citations:[], limitations:[仅验证服务响应，不代表运维结论正确]。",
                 sources: [],
+              }),
+            );
+          if (route === "POST /api/predict")
+            return send(
+              200,
+              await predictFn({
+                config,
+                prefix: body.prefix,
+                targets: body.targets,
+                unit: body.unit,
+                context: body.context,
               }),
             );
           if (route !== "POST /api/ai")
