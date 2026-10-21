@@ -1144,17 +1144,20 @@ function openCase(id, tab = "overview") {
   save();
   openEntity("event", id, tab);
 }
-function openEntity(type, id, tab = "overview") {
+function openEntity(type, id, tab = "overview", opts = {}) {
   if (
     (type === "asset" && !dev(id)) ||
     (type === "alarm" && !state.alarms.some((a) => a.id === id)) ||
     (type === "work" && !state.work.some((w) => w.id === id))
   )
     return;
+  // plain：纯资产视图（数字孪生点击/资产档案进入）。只展示设备自身档案，
+  // 不带 S1–S4 场景阶段与工单旅程；场景故事保留在「场景演示」页与告警业务流中。
+  const plain = type === "asset" && !!opts.plain;
   const caseId =
     type === "event"
       ? id
-      : type === "asset"
+      : type === "asset" && !plain
         ? caseForDevice(id)
         : type === "alarm"
           ? caseForAlarm(id)
@@ -1173,7 +1176,8 @@ function openEntity(type, id, tab = "overview") {
   detail = {
     type,
     id,
-    caseId,
+    caseId: plain ? null : caseId,
+    plain,
     tab: detailTabs.some((t) => t[0] === tab) ? tab : "overview",
   };
   drawDetail();
@@ -1702,7 +1706,7 @@ function twinSync() {
   if (!el || !globalThis.Twin3d) return;
   if (twinCtrl && twinHostEl !== el) twinTeardown();
   if (!twinCtrl) {
-    twinCtrl = Twin3d.mount(el, { devices: twinDevices(), onSelect: (id) => openEntity("asset", id, "figure") });
+    twinCtrl = Twin3d.mount(el, { devices: twinDevices(), onSelect: (id) => openEntity("asset", id, "figure", { plain: true }) });
     twinHostEl = el;
     window.DEMO = window.DEMO || {};
     window.DEMO.twin = twinCtrl;
@@ -1905,7 +1909,7 @@ function genericFigKey(d, a) {
   if (d.type === "温湿度传感器") return "th";
   return null;
 }
-assetDetail = (id) => openEntity("asset", id);
+assetDetail = (id) => openEntity("asset", id, "overview", { plain: true });
 alarmDetail = (id) => openEntity("alarm", id);
 workDetail = (id) => openEntity("work", id, "actions");
 const nativeAck = ackAlarm,
