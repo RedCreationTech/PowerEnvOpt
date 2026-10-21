@@ -25,6 +25,7 @@ const assets = new Set([
   "/iso-energy.js",
   "/iso-ups.js",
   "/iso-dg.js",
+  "/iso-th.js",
   "/twin3d.js",
   "/vendor/three.min.js",
   "/assets/hongchuang-logo.svg",

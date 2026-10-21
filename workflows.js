@@ -1080,7 +1080,7 @@ function entityLink() {
     ? `<div class="entity-shortcut">${badge(stageLabel[jr(id).stage])}<span>${cs(id).event} · ${nextOwner(id)}</span>${wfAction("查看关联事件", `openCase('${id}','overview')`)}</div>`
     : "";
 }
-views.monitor = () => nativeViews.monitor() + entityLink();
+views.monitor = () => monView() + entityLink();
 views.assistant = () => nativeViews.assistant() + entityLink();
 views.health = () => {
   const select = deviceSelect(),
@@ -1362,13 +1362,14 @@ function genericDetail(d, tab) {
   return `<h3>${a.id} · ${badge(a.status)}</h3><p>接管只改变处理状态，不表示异常恢复。</p>${a.work ? wfAction("查看关联工单", `workDetail('${a.work}')`) : ""}${allowed("operator", "supervisor") ? `<label for="alarm-reason">操作依据（必填）</label><textarea id="alarm-reason"></textarea><div class="toolbar">${a.status === "待确认" && allowed("operator") ? wfAction("确认告警", `ackAlarm('${a.id}')`, true) : ""}${!a.work && a.status === "已确认" && allowed("operator", "supervisor") ? wfAction("创建待分派工单", `createWork('${a.id}')`, true) : ""}${wfAction("升级等级", `escalateAlarm('${a.id}')`)}${allowed("supervisor") ? wfAction("抑制 15 分钟", `suppressAlarm('${a.id}')`) : ""}</div>` : "<p>由值班监控人员接管后转工单，主管审核分派。</p>"}`;
 }
 // ———————————————————— 机理示意（iso-*.js 等距剖视，数据来自 CASES）————————————————————
-const CASE_FIGURE = { cooling: "AcFigure", battery: "BattFigure", capacity: "PduFigure", energy: "EnergyFigure", ups: "UpsFigure", dg: "DgFigure" };
+const CASE_FIGURE = { cooling: "AcFigure", battery: "BattFigure", capacity: "PduFigure", energy: "EnergyFigure", ups: "UpsFigure", dg: "DgFigure", th: "ThFigure" };
 // 新图复用既有 CASE 数据做驱动：ups ← 容量场景（负载率%）、dg ← 电池场景（数值按 V 呈现）
 const FIG_MODEL = { ups: "capacity", dg: "battery" };
 function figCase(key) {
-  const base = cs(FIG_MODEL[key] || key);
+  const base = cs(FIG_MODEL[key] || key) || {};
   if (key === "dg") return { ...base, unit: "V", metric: "启动蓄电池电压" };
   if (key === "ups") return { ...base, metric: "UPS 负载率" };
+  if (key === "th") return { title: "S0 · 温湿度传感站", metric: "环境温度", unit: "°C", kb: "KB-TH-01", device: "HC-BJ-005", series: [25, 25.2, 25.4, 25.3, 25.1, 25], after: [25, 25.1, 25, 25.1, 25, 25], threshold: 30, temp: 25, hum: 46, alarmT: 30, alarmH: 80 };
   return base;
 }
 let figCtrl = null,
@@ -1526,12 +1527,17 @@ function aiDemoCompute(s) {
 function aiDemoErrPct(c, s, mae) {
   return c.unit === "kW"
     ? (mae / (s.reduce((x, v) => x + v, 0) / s.length)) * 100
-    : (mae / 20) * 100;
+    : c.unit === "°C"
+      ? (mae / 20) * 100
+      : (mae / 40) * 100;
+}
+function aiDemoErrLabel(c) {
+  return c.unit === "kW" ? "R10 能耗 WAPE" : c.unit === "°C" ? "R09 误差（MAE/20°C 量程）" : "R09 误差（MAE/40V 量程）";
 }
 function aiDemoChips(c, r2, errPct) {
   const chip = (pass, label, got, target) =>
     `<span class="ai-chip ${pass ? "pass" : "miss"}"><b>${label}</b> ${got}<small>目标 ${target}</small></span>`;
-  return `${chip(r2 > 0.97, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97")}${chip(errPct < 5, c.unit === "kW" ? "R10 能耗 WAPE" : "R09 误差（MAE/20°C 量程）", errPct.toFixed(2) + "%", "&lt; 5%")}${chip(true, "R11 语义匹配", "100%", "≥ 94%")}`;
+  return `${chip(r2 > 0.97, "R08 预测 R²", r2.toFixed(3), "&gt; 0.97")}${chip(errPct < 5, aiDemoErrLabel(c), errPct.toFixed(2) + "%", "&lt; 5%")}${chip(true, "R11 语义匹配", "100%", "≥ 94%")}`;
 }
 function aiDemoRun(key) {
   const c = figCase(key),
@@ -1726,14 +1732,177 @@ function figAlarmBanner(a) {
 const baseAssetsView = views.assets;
 views.assets = () => twin3dCard() + baseAssetsView();
 
+// ———————————— 实时监控重构：左曲线多序列叠加 + 右机理图 + 时间筛选 + CSV 导出 ————————————
+const MON_FIG_KEY = { 精密空调: "cooling", 蓄电池组: "battery", UPS: "ups", 配电柜: "capacity", 柴油发电机: "dg", 温湿度传感器: "th" };
+let monSel = [],
+  monRange = "today",
+  monCustom = null,
+  monLastDevice = null,
+  monFigCtrl = null,
+  monFigHostEl = null;
+const MON_NOW = () => Date.UTC(2026, 9, 17, 1, 45) + state.tick * 300000;
+function monRangeMs() {
+  const now = MON_NOW();
+  if (monRange === "custom" && monCustom) return monCustom;
+  if (monRange === "today") {
+    const day = new Date(now + 8 * 3600e3);
+    return [Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate()) - 8 * 3600e3, now];
+  }
+  const d = { "3d": 3, "7d": 7, "30d": 30 }[monRange] || 1;
+  return [now - d * 864e5, now];
+}
+function monInterval(range) {
+  const h = range / 36e5;
+  if (h <= 26) return 6e5; // 10 分钟
+  if (h <= 96) return 18e5; // 30 分钟
+  if (h <= 240) return 72e5; // 2 小时
+  return 216e5; // 6 小时
+}
+function monNumericPoints(d) {
+  return points(d)
+    .map((p, i) => ({ ...p, idx: i, num: typeof p.value === "number" ? p.value : NaN }))
+    .filter((p) => Number.isFinite(p.num));
+}
+function monSeriesAt(p, t, d) {
+  const k = p.idx + (d.id.charCodeAt(3) || 0) + (d.id.charCodeAt(6) || 0);
+  return p.num * (1 + 0.045 * Math.sin(t / 7.2e6 + k * 1.31) + 0.012 * Math.sin(t / 8.64e7 + k));
+}
+function monChartSvg() {
+  const d = dev(selectedDevice),
+    vis = monNumericPoints(d).filter((p) => monSel.includes(p.id)),
+    [from, to] = monRangeMs(),
+    step = monInterval(to - from),
+    n = Math.max(2, Math.min(160, Math.round((to - from) / step) + 1)),
+    ts = Array.from({ length: n }, (_, i) => from + ((to - from) * i) / (n - 1)),
+    PAL = ["#4b7ae5", "#159883", "#dc9860", "#8f6fd8", "#d8708a", "#5aa3c9"];
+  if (!vis.length) return `<div class="empty" style="padding:60px 0">在下表「操作」列点击「显示」，把指标趋势叠加到曲线。</div>`;
+  const all = vis.flatMap((p) => ts.map((t) => monSeriesAt(p, t, d))),
+    lo = Math.min(...all),
+    hi = Math.max(...all),
+    span = hi - lo || 1,
+    X = (t) => 46 + ((t - from) / (to - from)) * 560,
+    Y = (v) => 380 - ((v - lo) / span) * 350,
+    fmt = (t) => new Date(t + 8 * 3600e3).toISOString().slice(5, 16).replace("T", " ");
+  const grid = [0, 1, 2, 3]
+    .map((i) => { const y = 30 + i * 88; return `<line x1="46" x2="606" y1="${y}" y2="${y}" stroke="#edf1f7"/><text x="2" y="${y + 4}" font-size="10">${(hi - (span * i) / 3).toFixed(1)}</text>`; })
+    .join("");
+  const lines = vis
+    .map((p, j) => `<polyline points="${ts.map((t) => `${X(t).toFixed(1)},${Y(monSeriesAt(p, t, d)).toFixed(1)}`).join(" ")}" fill="none" stroke="${PAL[j % 6]}" stroke-width="2.2"/>`)
+    .join("");
+  const area = `<polygon points="46,380 ${ts.map((t) => `${X(t).toFixed(1)},${Y(monSeriesAt(vis[0], t, d)).toFixed(1)}`).join(" ")} 606,380" fill="${PAL[0]}" opacity="0.08"/>`;
+  const lbl = [0, 0.5, 1].map((k) => `<text x="${Math.max(2, 46 + 560 * k - 22)}" y="416" font-size="10">${fmt(from + (to - from) * k)}</text>`).join("");
+  return `<svg class="chart" viewBox="0 0 640 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="测点趋势曲线">${grid}${area}${lines}${lbl}<text x="440" y="16" font-size="10" fill="#93a3bd">北京时间 UTC+08 · 合成场景</text></svg><div class="legend">${vis.map((p, j) => `<span><i style="background:${PAL[j % 6]}"></i>${esc(p.name)}</span>`).join("")}</div>`;
+}
+// 机理图模型：按设备类型映射，数值取自该设备当前测点（演示口径）
+function monFigModel(d) {
+  const key = MON_FIG_KEY[d.type];
+  if (!key) return null;
+  const pts = points(d),
+    num = (name) => { const p = pts.find((x) => x.name === name); return typeof p?.value === "number" ? p.value : null; },
+    drift = Array.from({ length: 6 }, (_, i) => 1 + 0.03 * Math.sin(i * 1.7 + d.id.length)),
+    s6 = (base) => drift.map((k) => +(base * k).toFixed(1));
+  if (key === "cooling") {
+    const t = num("回风温度") ?? 26,
+      dp = Math.max(70, num("滤网压差") ?? 78);
+    return { series: s6(t), after: s6(t), threshold: 28, dpFrom: 70, dpTo: dp, loadFrom: 55, loadTo: 60, index: 5 };
+  }
+  if (key === "battery") { const cap = num("估算容量") ?? 92; return { series: s6(Math.max(0, 100 - cap)), after: s6(Math.max(0, 100 - cap)), threshold: 25, index: 5 }; }
+  if (key === "ups") { const l = num("负载率") ?? d.load; return { series: s6(l), after: s6(l), threshold: 85, planned: 10, index: 5 }; }
+  if (key === "capacity") return { series: s6(d.load ?? 60), after: s6(d.load ?? 60), threshold: 85, planned: 10, index: 5 };
+  if (key === "dg") return { series: [24.2, 24.0, 23.9, 24.1, 24.3, 24.2], after: [26.8, 26.9, 27, 27, 26.9, 27], threshold: 20, index: 5, recoveredValue: 27 };
+  if (key === "th") return { temp: num("环境温度") ?? d.temp ?? 25, hum: num("相对湿度") ?? 46, alarmT: 30, alarmH: 80, index: 5 };
+  return null;
+}
+function monSync() {
+  const host = $("#mon-fig-host");
+  if (!host) return;
+  const d = dev(selectedDevice),
+    key = MON_FIG_KEY[d.type];
+  if (monFigHostEl !== host) {
+    if (monFigCtrl) monFigCtrl.destroy();
+    monFigCtrl = null;
+    monFigHostEl = host;
+  }
+  if (!key) {
+    if (monFigCtrl) { monFigCtrl.destroy(); monFigCtrl = null; }
+    host.innerHTML = `<div class="empty" style="padding:44px 14px">温湿度传感器为无机构件，暂无机理示意图。</div>`;
+    return;
+  }
+  const m = monFigModel(d);
+  if (monFigCtrl) monFigCtrl.set(m);
+  else monFigCtrl = globalThis[CASE_FIGURE[key]].mount(host, m);
+}
+function monToggle(id) {
+  monSel = monSel.includes(id) ? monSel.filter((x) => x !== id) : [...monSel, id];
+  render();
+}
+function monSetRange(r) {
+  monRange = r;
+  if (r !== "custom") monCustom = null;
+  render();
+}
+function monApplyCustom() {
+  const f = document.getElementById("mon-from")?.value,
+    t = document.getElementById("mon-to")?.value;
+  if (!f || !t) return toast("请选择完整的起止时间");
+  const from = Date.parse(f + ":00+08:00"),
+    to = Date.parse(t + ":00+08:00");
+  if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) return toast("结束时间须晚于开始时间");
+  monRange = "custom";
+  monCustom = [from, to];
+  render();
+}
+function monExport() {
+  const d = dev(selectedDevice),
+    [from, to] = monRangeMs(),
+    step = monInterval(to - from),
+    n = Math.max(2, Math.min(160, Math.round((to - from) / step) + 1)),
+    ts = Array.from({ length: n }, (_, i) => from + ((to - from) * i) / (n - 1)),
+    vis = monNumericPoints(d).filter((p) => monSel.includes(p.id));
+  if (!vis.length) return toast("请先在测点快照中「显示」至少一条曲线");
+  const rows = [
+    ["时间(+08)", ...vis.map((p) => `${p.name}(${p.unit})`)],
+    ...ts.map((t) => [new Date(t + 8 * 3600e3).toISOString().slice(0, 16).replace("T", " "), ...vis.map((p) => monSeriesAt(p, t, d).toFixed(2))]),
+  ];
+  download(`监控曲线_${d.id}.csv`, csv(rows), "text/csv;charset=utf-8");
+}
+function monView() {
+  const d = dev(selectedDevice);
+  if (monLastDevice !== d.id) {
+    const first = monNumericPoints(d)[0]?.id;
+    monSel = first ? [first] : [];
+    monLastDevice = d.id;
+    if (monFigCtrl) { monFigCtrl.destroy(); monFigCtrl = null; monFigHostEl = null; }
+  }
+  const [from, to] = monRangeMs(),
+    dt = (ms) => new Date(ms + 8 * 3600e3).toISOString().slice(0, 16),
+    rangeBtns = [["today", "今日"], ["3d", "近3日"], ["7d", "近7日"], ["30d", "近30日"]]
+      .map(([k, l]) => `<button class="small ${monRange === k ? "active" : ""}" onclick="monSetRange('${k}')">${l}</button>`)
+      .join("");
+  return `<div class="card" style="margin-bottom:16px">${head("实时监控 · 测点趋势", `<span class="subtext">${d.id} · ${esc(d.name)} · ${esc(d.type)}</span>`)}
+    <div class="toolbar mon-bar"><select aria-label="设备选择" onchange="selectedDevice=this.value;render()">${filteredDevices().map((x) => `<option value="${x.id}" ${selectedDevice === x.id ? "selected" : ""}>${x.id} · ${esc(x.name)}</option>`).join("")}</select><span class="mon-lab">时间</span>${rangeBtns}<input id="mon-from" type="datetime-local" value="${dt(from)}" aria-label="开始时间"><span class="mon-lab">至</span><input id="mon-to" type="datetime-local" value="${dt(to)}" aria-label="结束时间"><button class="small" onclick="monApplyCustom()">应用</button><button class="small" onclick="monExport()">↓ 导出曲线 CSV</button></div>
+    <div class="mon-split"><div class="mon-chart">${monChartSvg()}</div><div class="mon-fig"><h4>设备机理示意 <span class="badge info">演示口径</span></h4><div id="mon-fig-host" class="case-fig"></div></div></div>
+    <div class="split-note">所有值为合成场景。状态量测点不参与曲线叠加；右侧机理图按设备类型映射，序列取自该设备当前测点（演示口径）。</div></div>
+    <div class="card">${head("测点快照", `<span class="subtext">${points(d).length} 个测点 · 操作列可叠加曲线</span>`)}${table(
+      ["测点 ID", "指标", "当前值", "单位", "数据质量", "源时间", "操作"],
+      points(d).map((p) => {
+        const numeric = typeof p.value === "number",
+          on = monSel.includes(p.id);
+        return `<tr><td>${p.id}</td><td>${esc(p.name)}</td><td><strong>${p.value}</strong></td><td>${esc(p.unit)}</td><td>${badge(p.quality)}</td><td>${p.source_ts}</td><td>${numeric ? `<button class="small mon-tg ${on ? "active" : ""}" onclick="monToggle('${p.id}')">${on ? "隐藏" : "显示"}</button>` : '<span class="subtext">状态量</span>'}</td></tr>`;
+      }),
+    )}</div>`;
+}
+
 // ———————————— 告警/资产 → 机理图映射：设备类型优先，同类机理不再错配 ————————————
 function genericFigKey(d, a) {
-  // 设备类型优先：每类设备配专属机理图；无图类型走空状态，不硬凑
-  if (d.type === "精密空调") return a && /效率|能耗|功率/.test(a.title) ? "energy" : "cooling";
+  // 设备类型优先：设备视图始终显示设备本身的机理图；告警只决定横幅与数据故事
+  //（能耗循环等场景化机理保留在 S4 场景/案例抽屉中呈现）
+  if (d.type === "精密空调") return "cooling";
   if (d.type === "蓄电池组") return "battery";
   if (d.type === "UPS") return "ups";
-  if (d.type === "配电柜") return "pdu";
+  if (d.type === "配电柜") return "capacity";
   if (d.type === "柴油发电机") return "dg";
+  if (d.type === "温湿度传感器") return "th";
   return null;
 }
 assetDetail = (id) => openEntity("asset", id);
@@ -1964,6 +2133,7 @@ render = () => {
   else scenFigTeardown();
   if (page === "assets") twinSync();
   else twinTeardown();
+  if (page === "monitor") monSync();
   drawDetail();
 };
 const viewContexts = {};

@@ -71,6 +71,7 @@ const html = `<!doctype html>
     <script>${inline("iso-energy.js")}</script>
     <script>${inline("iso-ups.js")}</script>
     <script>${inline("iso-dg.js")}</script>
+    <script>${inline("iso-th.js")}</script>
     <script>
       const CASES = ${JSON.stringify(CASES)};
       const fig = document.getElementById("fig");

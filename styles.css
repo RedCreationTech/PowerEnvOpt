@@ -2096,3 +2096,193 @@ details.card > summary {
   border-radius: 10px;
   color: #a03a28;
 }
+
+/* —— 实时监控重构：曲线 + 机理图 双栏 —— */
+.mon-bar {
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.mon-bar select {
+  max-width: 240px;
+}
+.mon-bar input[type="datetime-local"] {
+  padding: 6px 8px;
+  border: 1px solid #d5deeb;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  color: #1d2735;
+  background: #fff;
+}
+.mon-lab {
+  font-size: 12px;
+  color: #61728c;
+  margin-left: 6px;
+}
+.mon-bar button.active,
+.mon-tg.active {
+  background: #2f6df6;
+  border-color: #2f6df6;
+  color: #fff;
+}
+.mon-split {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 10px;
+}
+.mon-chart {
+  flex: 1.5;
+  min-width: 0;
+}
+.mon-fig {
+  flex: 1;
+  max-width: 440px;
+  border-left: 1px dashed #d5deeb;
+  padding-left: 16px;
+}
+.mon-fig h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #1d2735;
+}
+@media (max-width: 1100px) {
+  .mon-split {
+    flex-direction: column;
+  }
+  .mon-fig {
+    max-width: none;
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+/* —— 实时监控：固定双栏行高（示意图高度恒定，曲线占满）—— */
+.mon-split {
+  height: 470px;
+  align-items: stretch;
+}
+.mon-chart {
+  display: flex;
+  flex-direction: column;
+}
+.mon-chart svg.chart {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mon-chart .legend {
+  padding-top: 4px;
+}
+.mon-fig {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.mon-fig .case-fig {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mon-fig .case-fig svg {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+.mon-fig .empty {
+  margin: auto;
+}
+@media (max-width: 1100px) {
+  .mon-split {
+    height: auto;
+  }
+  .mon-chart {
+    height: 320px;
+  }
+  .mon-fig {
+    height: 440px;
+    max-width: none;
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+/* —— AI 运维助手：Codex 风格对话输入组合器 —— */
+.chat-composer {
+  border: 1px solid #d5deeb;
+  border-radius: 14px;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.chat-composer:focus-within {
+  border-color: #2f6df6;
+  box-shadow: 0 0 0 3px rgba(47, 109, 246, 0.12);
+}
+.chat-composer textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  padding: 12px 14px 6px;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  min-height: 42px;
+  max-height: 150px;
+  display: block;
+}
+.composer-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 8px 12px;
+}
+.composer-hint {
+  font-size: 11px;
+  color: #93a3bd;
+}
+.composer-send {
+  margin-left: auto;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2f6df6;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+.composer-send:hover {
+  background: #245fd8;
+}
+
+/* —— 文件上传输入：与全局表单/按钮风格统一 —— */
+input[type="file"] {
+  padding: 7px;
+  font-size: 13px;
+  color: #61728c;
+}
+input[type="file"]::file-selector-button {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 13px;
+  margin-right: 10px;
+  background: #fff;
+  border: 1px solid #dce3ed;
+  border-radius: 7px;
+  color: #465570;
+  cursor: pointer;
+  transition: 0.18s;
+}
+input[type="file"]::file-selector-button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: #f5f8ff;
+}
