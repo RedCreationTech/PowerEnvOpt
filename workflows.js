@@ -84,7 +84,7 @@ const CASES = {
     ],
   },
   capacity: {
-    title: "扩展 · 配电容量风险审查",
+    title: "S3 · 配电容量风险审查",
     subtitle: "把计划新增负载纳入容量与冗余判断",
     tag: "容量与变更",
     device: "HC-SZ-004",
@@ -135,7 +135,7 @@ const CASES = {
   },
 };
 CASES.energy = {
-  title: "S3 · 空调同负载能耗异常与优化验证",
+  title: "S4 · 空调同负载能耗异常与优化验证",
   subtitle: "同负载、同气象窗口比较输入功率，优化效果须独立复测",
   tag: "能耗优化",
   device: "HC-SH-009",
