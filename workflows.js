@@ -1695,7 +1695,11 @@ function aiModelRender(key, out) {
 // ———————————— WebGL 3D 数字孪生机房（资产页：漫游 + 点击进机理示意）————————————
 let twinCtrl = null,
   twinHostEl = null,
-  twinLastSite = null;
+  twinLastSite = null,
+  twinRel = "全部",
+  twinCruiseOn = false,
+  twinCamClosed = false,
+  twinFs = false;
 function twinDevices() {
   return state.devices.map((d) => {
     const alarm = state.alarms.find((a) => a.device === d.id && a.status !== "已关闭");
@@ -1705,18 +1709,26 @@ function twinDevices() {
 function twinSync() {
   const el = $("#twin3d-host");
   if (!el || !globalThis.Twin3d) return;
-  if (twinCtrl && twinHostEl !== el) twinTeardown();
+  const devs = twinDevices().filter((d) => site === "all" || d.site === site);
   if (!twinCtrl) {
-    twinCtrl = Twin3d.mount(el, { devices: twinDevices(), onSelect: (id) => openEntity("asset", id, "figure", { plain: true }) });
-    twinHostEl = el;
+    twinCtrl = Twin3d.mount(el, { devices: devs, siteOrder: SITES, onSelect: (id) => openEntity("asset", id, "figure", { plain: true }) });
     window.DEMO = window.DEMO || {};
     window.DEMO.twin = twinCtrl;
-  } else twinCtrl.setDevices(twinDevices());
-  // 只在站点模式切换时瞬移，避免打断用户漫游
-  if (state.site !== twinLastSite) {
-    twinCtrl.teleport(state.site === "all" ? "all" : state.site);
-    twinLastSite = state.site;
+  } else {
+    // render() 会重建 #content DOM：把既有画布挂回新宿主，保留相机位/巡航状态，避免整景销毁重建
+    if (twinHostEl !== el && twinCtrl._el && twinCtrl._el.parentNode !== el)
+      el.appendChild(twinCtrl._el);
+    twinCtrl.setDevices(devs);
   }
+  twinHostEl = el;
+  // 站点瞬移先行，关系/巡航叠加最后应用，避免被 teleport 清掉
+  if (site !== twinLastSite) {
+    twinCtrl.teleport(site === "all" ? "all" : site);
+    twinLastSite = site;
+  }
+  const links = topoEdges().filter((l) => twinRel === "全部" || l.type === twinRel);
+  if (twinCtrl.setLinks) twinCtrl.setLinks(links);
+  if (twinCtrl.setCruise) twinCtrl.setCruise(twinCruiseOn);
 }
 function twinTeardown() {
   if (twinCtrl) {
@@ -1726,13 +1738,53 @@ function twinTeardown() {
   twinHostEl = null;
   twinLastSite = null;
 }
-function twinGo(site) {
-  state.site = site;
-  save();
+function twinGo(s) {
+  setSite(s);
+}
+function twinSetRel(t) {
+  twinRel = t;
   render();
 }
+function twinCruise() {
+  twinCruiseOn = !twinCruiseOn;
+  render();
+}
+function twinCamToggle() {
+  twinCamClosed = !twinCamClosed;
+  const p = $("#twin-cam");
+  if (p) p.classList.toggle("closed", twinCamClosed);
+}
+function twinToggleFs() {
+  twinFs = !twinFs;
+  const card = document.querySelector(".twin3d-card");
+  if (card) card.classList.toggle("twin-fs", twinFs);
+  const btn = document.querySelector(".twin-cam-fs");
+  if (btn) btn.classList.toggle("on", twinFs);
+  if (twinFs) card && card.scrollIntoView();
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && twinFs) twinToggleFs();
+});
+function twinCamAct(act) {
+  if (!twinCtrl) return;
+  if (act === "up") twinCtrl.nudge(1, 0);
+  else if (act === "down") twinCtrl.nudge(-1, 0);
+  else if (act === "left") twinCtrl.nudge(0, -1);
+  else if (act === "right") twinCtrl.nudge(0, 1);
+  else if (act === "home") twinCtrl.home();
+  else if (act === "in") twinCtrl.dolly(1);
+  else if (act === "out") twinCtrl.dolly(-1);
+  else if (act === "top" || act === "front" || act === "iso") twinCtrl.setView(act);
+}
+function twinRelBar() {
+  const rels = ["全部", "供电连接", "冗余关系", "制冷影响", "通信依赖"];
+  return `<div class="toolbar twin3d-bar twin-rel-bar"><span class="twin-rel-lab">关系叠加</span>${rels.map((t) => `<button class="small ${twinRel === t ? "active" : ""}" onclick="twinSetRel('${t}')">${t}</button>`).join("")}</div>`;
+}
+function twinCamPanel() {
+  return `<div class="twin-cam ${twinCamClosed ? "closed" : ""}" id="twin-cam"><div class="twin-cam-head" onclick="twinCamToggle()"><span class="twin-cam-ico">✦</span><span class="twin-cam-title">3D 相机操控中心</span><button class="twin-cam-cruise ${twinCruiseOn ? "on" : ""}" onclick="event.stopPropagation();twinCruise()">⟳ 自动巡航</button><button class="twin-cam-fs ${twinFs ? "on" : ""}" onclick="event.stopPropagation();twinToggleFs()" title="全屏 / 退出全屏" aria-label="全屏切换"><svg class="ic-expand" viewBox="0 0 16 16" width="12" height="12"><path d="M3 6V3h3M13 6V3h-3M3 10v3h3M13 10v3h-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="ic-collapse" viewBox="0 0 16 16" width="12" height="12"><path d="M6 3v3H3M10 3v3h3M6 13v-3H3M10 13v-3h3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="twin-cam-fold">⌃</span></div><div class="twin-cam-body"><div class="twin-cam-dpad"><span></span><button onclick="twinCamAct('up')" aria-label="前移">↑</button><span></span><button onclick="twinCamAct('left')" aria-label="左移">←</button><button class="cam-home" onclick="twinCamAct('home')" aria-label="回到站点视角">⌂</button><button onclick="twinCamAct('right')" aria-label="右移">→</button><span></span><button onclick="twinCamAct('down')" aria-label="后移">↓</button><span></span></div><div class="twin-cam-row"><span class="cam-lab">镜头缩放</span><button onclick="twinCamAct('in')">⌕ 放大</button><button onclick="twinCamAct('out')">⌐ 缩小</button></div><div class="twin-cam-row"><button onclick="twinCamAct('top')">▦ 俯视拓扑</button><button onclick="twinCamAct('front')">▤ 正面横剖</button><button onclick="twinCamAct('iso')">◈ 标准等轴</button></div></div></div>`;
+}
 function twin3dCard() {
-  return `<section class="card twin3d-card">${head("动力机房数字孪生", badge("3D 示意"))}<p>三个站点大厅按真实布局口径示意（每厅 A/B 两个动力机房，各 6 类设备）；点击进入场景后：点击锁定鼠标漫游（360° 视角、WASD 移动、Q/E 升降、Esc 退出），<b>点击任意设备飞到其跟前并打开该设备的机理示意</b>。布局与模型为演示口径。</p><div class="toolbar twin3d-bar">${["all", ...SITES].map((s) => `<button class="small ${state.site === s ? "active" : ""}" onclick="twinGo('${s}')">${s === "all" ? "全部站点" : s}</button>`).join("")}<span class="twin-legend"><i class="lg ok"></i>正常<i class="lg alarm"></i>活动告警<i class="lg off"></i>离线</span></div><div id="twin3d-host"></div></section>`;
+  return `<section class="card twin3d-card">${head("动力机房数字孪生", badge("3D 示意"))}<p>三个站点大厅按真实布局口径示意（每厅 A/B 两个动力机房，各 6 类设备）；点击进入场景后：点击锁定鼠标漫游（360° 视角、WASD 移动、Q/E 升降、Esc 退出），<b>点击任意设备飞到其跟前并打开该设备的机理示意</b>。上方站点按钮与全页筛选联动；关系叠加把供电与环境关系的上下游依赖画进 3D 场景。布局与模型为演示口径。</p><div class="toolbar twin3d-bar">${["all", ...SITES].map((s) => `<button class="small ${site === s ? "active" : ""}" onclick="twinGo('${s}')">${s === "all" ? "全部站点" : s}</button>`).join("")}<span class="twin-legend"><i class="lg ok"></i>正常<i class="lg alarm"></i>活动告警<i class="lg off"></i>离线</span></div>${twinRelBar()}<div class="twin3d-host-wrap"><div id="twin3d-host"></div>${twinCamPanel()}</div></section>`;
 }
 // 机理示意 tab 顶部的活动告警横幅（有未闭环告警时显示）
 function figAlarmBanner(a) {

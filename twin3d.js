@@ -1,10 +1,12 @@
 /*
  * twin3d.js —— WebGL 3D 数字孪生机房（经典脚本 IIFE，全局 Twin3d，无模块依赖）。
  *
- * 世界：3 个站点大厅沿 x 轴分布（中心 -25 / 0 / +25，净宽 13m，间距 12m），
- * 每厅含 A、B 两个动力机房（隔断留 1.2m 门洞）。每区 6 类设备：
- * 配电柜 / UPS / 蓄电池组贴后墙，精密空调前排面朝后墙，柴油发电机撬座右前地板，
- * 温湿度传感器挂后墙。1 单位 = 1 m。
+ * 世界：3 个站点大厅沿 x 轴分布（中心 -40 / 0 / +40），三站厅尺寸与布局各异——
+ * 北京 17×7.6（蓝饰带）、上海 19×8.4（红饰带、加宽槽位）、深圳 13×6.2（青饰带、紧凑排布），
+ * 未知站点回落 14.5×6.4（灰饰带）。每厅含 A、B 两个动力机房（隔断留 1.2m 门洞，
+ * 区中心沿 X 错开）。每区 6 类设备：配电柜 / UPS / 蓄电池组贴后墙，精密空调前排面朝后墙，
+ * 柴油发电机撬座右前地板，温湿度传感器挂后墙；设备间关系以地板电缆 L 形走线叠加显示
+ * （深色打底管 + 上层流动箭头纹理，按类型着色并向目标端流动）。1 单位 = 1 m。
  *
  * 依赖 vendor/three.min.js（r152 UMD，全局 THREE）。漫游为自实现：
  * 指针锁定（单击 canvas 进入）+ 拖拽两种视角模式，WASD/方向键平移，Shift 加速，
@@ -18,12 +20,10 @@
   "use strict";
 
   /* ---------------- 常量 ---------------- */
-  const HALL_X = [-25, 0, 25]; // 三个大厅中心
-  const HALL_W = 13; // 净宽
-  const HALL_D = 5.6; // 净深
+  const HALL_X = [-40, 0, 40]; // 三个大厅中心
   const WALL_H = 3.2;
   const WALL_T = 0.2;
-  const WORLD_LIMIT = 60;
+  const WORLD_LIMIT = 88;
   const EYE_H = 1.7;
   const FLY_DIST = 2.2;
   const FLY_TIME = 0.9;
@@ -157,11 +157,37 @@
     return tex;
   }
 
-  // 地板瓷砖纹 + 网格线（整个大厅顶面一次映射）
-  function makeFloorTexture() {
+  // 电缆能量流箭头纹理：透明底 + 2 个小号白色人字形（chevron 朝 +x，约占 tile 高 40%），
+  // 材质用 color 染色；repeat.x = 线长/0.55，近看是细密流动箭头而非大色块
+  function makeFlowTexture() {
+    const cv = document.createElement("canvas");
+    cv.width = 128;
+    cv.height = 64;
+    const g = cv.getContext("2d");
+    g.clearRect(0, 0, 128, 64);
+    g.strokeStyle = "#ffffff";
+    g.lineWidth = 6;
+    g.lineCap = "round";
+    g.lineJoin = "round";
+    [34, 94].forEach(function (cx) {
+      g.beginPath();
+      g.moveTo(cx - 9, 19.5);
+      g.lineTo(cx + 9, 32);
+      g.lineTo(cx - 9, 44.5);
+      g.stroke();
+    });
+    const tex = new THREE.CanvasTexture(cv);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    tex.anisotropy = 4;
+    return tex;
+  }
+
+  // 地板瓷砖纹 + 网格线（整个大厅顶面一次映射；尺寸随站点配置）
+  function makeFloorTexture(hallW, hallD) {
     const PPM = 50; // 每米 50px
-    const W = HALL_W * PPM,
-      H = HALL_D * PPM;
+    const W = hallW * PPM,
+      H = hallD * PPM;
     const cv = document.createElement("canvas");
     cv.width = W;
     cv.height = H;
@@ -171,13 +197,13 @@
     // 瓷砖错缝
     g.strokeStyle = "#ccd1d8";
     g.lineWidth = 2;
-    for (let i = 0; i <= HALL_D * 2; i++) {
+    for (let i = 0; i <= hallD * 2; i++) {
       g.beginPath();
       g.moveTo(0, i * PPM * 0.5);
       g.lineTo(W, i * PPM * 0.5);
       g.stroke();
     }
-    for (let i = 0; i <= HALL_W * 2; i++) {
+    for (let i = 0; i <= hallW * 2; i++) {
       const off = i % 2 ? PPM * 0.25 : 0;
       g.beginPath();
       g.moveTo(i * PPM * 0.5, off);
@@ -187,13 +213,13 @@
     // 1m 主网格线
     g.strokeStyle = "#b4bac3";
     g.lineWidth = 3;
-    for (let i = 0; i <= HALL_W; i++) {
+    for (let i = 0; i <= hallW; i++) {
       g.beginPath();
       g.moveTo(i * PPM, 0);
       g.lineTo(i * PPM, H);
       g.stroke();
     }
-    for (let i = 0; i <= HALL_D; i++) {
+    for (let i = 0; i <= hallD; i++) {
       g.beginPath();
       g.moveTo(0, i * PPM);
       g.lineTo(W, i * PPM);
@@ -468,9 +494,11 @@
   }
 
   /* ---------------- 世界构建 ---------------- */
-  function buildHall(floorTex) {
+  function buildHall(floorTex, conf) {
     const g = new THREE.Group();
     const wallM = std(C.wall, { roughness: 0.95 });
+    const hallW = conf.hallW,
+      hallD = conf.hallD;
     // 地板（顶面瓷砖纹 CanvasTexture，其余侧面素色）
     const floorSide = std(C.floor);
     const floorTop = new THREE.MeshStandardMaterial({
@@ -478,7 +506,7 @@
       roughness: 0.9,
       metalness: 0.02,
     });
-    const floor = new THREE.Mesh(new THREE.BoxGeometry(HALL_W, 0.25, HALL_D), [
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(hallW, 0.25, hallD), [
       floorSide,
       floorSide,
       floorTop,
@@ -490,14 +518,26 @@
     floor.receiveShadow = true;
     g.add(floor);
     // 后墙 / 左右端墙
-    const back = box(HALL_W + 0.4, WALL_H, WALL_T, wallM, 0, WALL_H / 2, HALL_D / 2 + WALL_T / 2);
-    const left = box(WALL_T, WALL_H, HALL_D, wallM, -HALL_W / 2 - WALL_T / 2, WALL_H / 2, 0);
-    const right = box(WALL_T, WALL_H, HALL_D, wallM, HALL_W / 2 + WALL_T / 2, WALL_H / 2, 0);
+    const back = box(hallW + 0.4, WALL_H, WALL_T, wallM, 0, WALL_H / 2, hallD / 2 + WALL_T / 2);
+    const left = box(WALL_T, WALL_H, hallD, wallM, -hallW / 2 - WALL_T / 2, WALL_H / 2, 0);
+    const right = box(WALL_T, WALL_H, hallD, wallM, hallW / 2 + WALL_T / 2, WALL_H / 2, 0);
     g.add(back);
     g.add(left);
     g.add(right);
+    // 站点主题色窄饰带：贴后墙内侧顶部下方，三站一眼可辨
+    const band = box(
+      hallW - 0.6,
+      0.12,
+      0.05,
+      new THREE.MeshBasicMaterial({ color: conf.band }),
+      0,
+      WALL_H - 0.3,
+      hallD / 2 - 0.05
+    );
+    flat(band);
+    g.add(band);
     // 中间隔断（1.2m 门洞 + 门楣）
-    const segD = (HALL_D - 1.2) / 2;
+    const segD = (hallD - 1.2) / 2;
     g.add(box(WALL_T, WALL_H, segD, wallM, 0, WALL_H / 2, -(0.6 + segD / 2)));
     g.add(box(WALL_T, WALL_H, segD, wallM, 0, WALL_H / 2, 0.6 + segD / 2));
     g.add(box(WALL_T, WALL_H - 2.45, 1.2, wallM, 0, 2.45 + (WALL_H - 2.45) / 2, 0));
@@ -506,13 +546,71 @@
 
   // 每区槽位（相对区中心 zc）：pdu/ups/batt 后墙排，ac 前排朝后墙，dg 右前，th 挂墙
   const ZONE_SLOTS = {
-    pdu: { p: [-1.95, 0, 2.0], ry: 0, gap: 1.05 },
-    ups: { p: [0, 0, 2.0], ry: 0, gap: 1.15 },
-    batt: { p: [1.95, 0, 2.0], ry: 0, gap: 1.4 },
-    ac: { p: [0, 0, -1.62], ry: Math.PI, gap: 1.2 },
-    dg: { p: [1.7, 0, -0.15], ry: 0, gap: 2.0 },
-    th: { p: [-1.0, 1.5, 2.755], ry: 0, gap: 0.4 },
+    pdu: { p: [-2.3, 0, 2.4], ry: 0, gap: 1.15 },
+    ups: { p: [0.1, 0, 2.4], ry: 0, gap: 1.25 },
+    batt: { p: [2.4, 0, 2.4], ry: 0, gap: 1.5 },
+    ac: { p: [0, 0, -2.1], ry: Math.PI, gap: 1.3 },
+    dg: { p: [2.0, 0, -0.4], ry: 0, gap: 2.1 },
+    th: { p: [-1.2, 1.5, 3.15], ry: 0, gap: 0.45 },
   };
+
+  // 站点差异化配置：厅净宽/净深、A/B 区中心偏移（沿 X，±zc）、后墙主题色饰带、槽位变体。
+  // 约束：落地槽位 |x| ≤ hallW/2-1.4、z ≤ hallD/2-0.7；挂墙 th 贴后墙内侧（z = hallD/2-0.05）。
+  const SITECONF = {
+    "北京 · 亦庄数据中心": {
+      hallW: 17,
+      hallD: 7.6,
+      zc: 4.6,
+      band: 0x2f6df6, // 蓝
+      zone: {
+        pdu: { p: [-2.9, 0, 2.9], ry: 0, gap: 1.2 },
+        ups: { p: [0.1, 0, 2.9], ry: 0, gap: 1.35 },
+        batt: { p: [2.8, 0, 2.9], ry: 0, gap: 1.55 },
+        ac: { p: [-0.1, 0, -2.5], ry: Math.PI, gap: 1.4 },
+        dg: { p: [2.5, 0, -0.7], ry: 0, gap: 2.2 },
+        th: { p: [-1.5, 1.5, 3.75], ry: 0, gap: 0.45 },
+      },
+    },
+    "上海 · 张江数据中心": {
+      hallW: 19,
+      hallD: 8.4,
+      zc: 5.3,
+      band: 0xe1251b, // 红
+      zone: {
+        pdu: { p: [-3.8, 0, 3.2], ry: 0, gap: 1.25 },
+        ups: { p: [-1.2, 0, 3.2], ry: 0, gap: 1.6 }, // 容得下 2 台 UPS
+        batt: { p: [2.3, 0, 3.2], ry: 0, gap: 1.8 }, // 2 组电池
+        ac: { p: [-0.4, 0, -2.8], ry: Math.PI, gap: 1.6 }, // 2 台空调
+        dg: { p: [2.8, 0, -0.9], ry: 0, gap: 2.3 },
+        th: { p: [-2.0, 1.5, 4.15], ry: 0, gap: 0.65 }, // 2 个传感器
+      },
+    },
+    "深圳 · 南山数据中心": {
+      hallW: 13,
+      hallD: 6.2,
+      zc: 3.4,
+      band: 0x0ea5e9, // 青
+      zone: {
+        pdu: { p: [-2.0, 0, 2.3], ry: 0, gap: 1.1 },
+        ups: { p: [0.1, 0, 2.3], ry: 0, gap: 1.2 },
+        batt: { p: [2.0, 0, 2.3], ry: 0, gap: 1.45 },
+        ac: { p: [0, 0, -1.9], ry: Math.PI, gap: 1.3 },
+        dg: { p: [1.7, 0, -0.4], ry: 0, gap: 2.0 },
+        th: { p: [-1.1, 1.5, 3.05], ry: 0, gap: 0.4 },
+      },
+    },
+    default: {
+      hallW: 14.5,
+      hallD: 6.4,
+      zc: 3.6,
+      band: 0x9aa0a8, // 灰
+      zone: ZONE_SLOTS,
+    },
+  };
+
+  function siteConf(name) {
+    return SITECONF[name] || SITECONF.default;
+  }
 
   function addDevicePlate(group, dev) {
     const dims = group.userData.dims;
@@ -573,7 +671,6 @@
     const world = new THREE.Group();
     ctx.pickables = [];
     ctx.statusLights = [];
-    const floorTex = makeFloorTexture();
     const sites = [];
     ctx.devices.forEach(function (d) {
       if (d.site && sites.indexOf(d.site) < 0) sites.push(d.site);
@@ -591,13 +688,16 @@
     world.add(ground);
 
     sites.forEach(function (site, si) {
-      const cx = HALL_X[si] != null ? HALL_X[si] : si * 25;
-      const hall = buildHall(floorTex);
+      const oi = ctx.siteOrder ? Math.max(0, ctx.siteOrder.indexOf(site)) : si;
+      const cx = HALL_X[oi] != null ? HALL_X[oi] : oi * 40;
+      const conf = siteConf(site);
+      const floorTex = makeFloorTexture(conf.hallW, conf.hallD);
+      const hall = buildHall(floorTex, conf);
       hall.position.x = cx;
       world.add(hall);
       // 大厅正上方 2.8m 站点名铭牌（厅前悬空，避开隔断墙体）
       const siteSign = makeSignSprite(site, 3.4, 52);
-      siteSign.position.set(cx, 2.82, -3.2);
+      siteSign.position.set(cx, 2.82, -(conf.hallD / 2 + 0.4));
       world.add(siteSign);
 
       const siteDevs = ctx.devices.filter(function (d) {
@@ -611,10 +711,10 @@
       });
       rooms.sort();
       rooms.forEach(function (room, ri) {
-        const zc = ri === 0 ? -3.3 : 3.3; // 区中心 x 偏移
+        const zc = ri === 0 ? -conf.zc : conf.zc; // 区中心 x 偏移（A 左 B 右）
         // 墙上 Room 铭牌
         const roomSign = makeSignSprite(room, 1.9, 42);
-        roomSign.position.set(cx + zc, 2.62, HALL_D / 2 - 0.12);
+        roomSign.position.set(cx + zc, 2.62, conf.hallD / 2 - 0.12);
         world.add(roomSign);
 
         const rdevs = siteDevs.filter(function (d) {
@@ -627,7 +727,7 @@
           (byType[k] = byType[k] || []).push(d);
         });
         Object.keys(byType).forEach(function (k) {
-          const slot = ZONE_SLOTS[k] || ZONE_SLOTS.ups;
+          const slot = conf.zone[k] || ZONE_SLOTS[k] || ZONE_SLOTS.ups;
           const list = byType[k];
           list.forEach(function (dev, i) {
             const builder = BUILDERS[k] || buildUps;
@@ -667,6 +767,7 @@
 
     const devices = (opts && opts.devices) || [];
     const onSelect = opts && opts.onSelect;
+    const siteOrder = (opts && opts.siteOrder) || null;
 
     const root = document.createElement("div");
     root.className = "twin3d";
@@ -681,7 +782,7 @@
       fb.className = "twin3d-fallback";
       fb.textContent = "当前环境不支持 WebGL，3D 数字孪生机房无法渲染。";
       root.appendChild(fb);
-      const stub = { destroy: function () { if (fb.parentNode) fb.parentNode.removeChild(fb); }, teleport: function () {}, focusDevice: function () {}, setDevices: function () {} };
+      const stub = { destroy: function () { if (fb.parentNode) fb.parentNode.removeChild(fb); }, teleport: function () {}, focusDevice: function () {}, setDevices: function () {}, setLinks: function () {}, nudge: function () {}, dolly: function () {}, home: function () {}, setView: function () {}, setCruise: function () {} };
       active = stub;
       return stub;
     }
@@ -696,7 +797,7 @@
     const canvas = renderer.domElement;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(C.fog, 60, 90);
+    scene.fog = new THREE.Fog(C.fog, 80, 140);
 
     const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 240);
     camera.rotation.order = "YXZ";
@@ -707,12 +808,12 @@
     sun.position.set(38, 55, 28);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.left = -48;
-    sun.shadow.camera.right = 48;
-    sun.shadow.camera.top = 48;
-    sun.shadow.camera.bottom = -48;
+    sun.shadow.camera.left = -68;
+    sun.shadow.camera.right = 68;
+    sun.shadow.camera.top = 68;
+    sun.shadow.camera.bottom = -68;
     sun.shadow.camera.near = 5;
-    sun.shadow.camera.far = 170;
+    sun.shadow.camera.far = 220;
     sun.shadow.bias = -0.0006;
     scene.add(sun);
     const fill = new THREE.DirectionalLight(0xdfe9f7, 0.3);
@@ -740,6 +841,10 @@
       pickables: [],
       statusLights: [],
       sites: [],
+      siteOrder: siteOrder,
+      linkGroup: null,
+      linksKey: "",
+      flowTexs: [],
     };
     ctx.world = buildWorld(ctx);
     scene.add(ctx.world);
@@ -868,6 +973,7 @@
     }
 
     function focusDevice(id) {
+      st.cruise = false;
       const grp = ctx.pickables.find(function (g) {
         return g.name === id;
       });
@@ -881,20 +987,32 @@
       st.pendingSelect = id;
     }
 
+    function siteOrbit(name) {
+      const idx = ctx.sites.indexOf(name || "");
+      if (idx < 0)
+        return { x: 0, z: 0, r: 45, h: 16.5, look: 1.2 }; // 全部站点：绕三厅整体环绕
+      const oi = ctx.siteOrder ? Math.max(0, ctx.siteOrder.indexOf(name)) : idx;
+      const cx = HALL_X[oi] != null ? HALL_X[oi] : oi * 40;
+      return { x: cx, z: 0, r: 17, h: 7, look: 1.2 };
+    }
+
     function teleport(siteName) {
+      st.cruise = false;
       st.tween = null;
       st.pendingSelect = null;
+      st.lastSite = siteName;
       const idx = ctx.sites.indexOf(siteName);
       if (idx < 0) {
-        // 全部站点：高位全景，三个大厅尽收
-        camera.position.set(0, 12.5, -27);
+        // 全部站点：高位全景，三个大厅（间距 ±40、厅宽最大 19）尽收
+        camera.position.set(0, 20, -53);
         st.yaw = st.tyaw = Math.PI;
-        st.pitch = st.tpitch = -0.3;
-        st.eyeTarget = 12.5;
+        st.pitch = st.tpitch = -0.24;
+        st.eyeTarget = 20;
       } else {
         // 单站点：厅前升高正视，站名铭牌与 A/B 机房完整可见
-        const cx = HALL_X[idx] != null ? HALL_X[idx] : idx * 25;
-        camera.position.set(cx, 3.4, -11);
+        const oi = ctx.siteOrder ? Math.max(0, ctx.siteOrder.indexOf(siteName)) : idx;
+        const cx = HALL_X[oi] != null ? HALL_X[oi] : oi * 40;
+        camera.position.set(cx, 3.4, -13.5);
         st.yaw = st.tyaw = Math.PI;
         st.pitch = st.tpitch = -0.16;
         st.eyeTarget = 3.4;
@@ -1021,6 +1139,25 @@
               }
             }
           }
+        } else if (st.cruise) {
+          // 自动巡航：以站点中心为视点做轨道环绕
+          const o = siteOrbit(st.lastSite);
+          if (st.cruiseA == null) {
+            st.cruiseA = Math.atan2(camera.position.z - o.z, camera.position.x - o.x);
+            const dx = camera.position.x - o.x,
+              dz = camera.position.z - o.z;
+            st.cruiseR = THREE.MathUtils.clamp(Math.hypot(dx, dz), 10, 34);
+            st.cruiseH = THREE.MathUtils.clamp(camera.position.y, 3.5, 15);
+          }
+          st.cruiseA += dt * 0.22;
+          st.cruiseR += (o.r - st.cruiseR) * Math.min(dt * 1.6, 1);
+          st.cruiseH += (o.h - st.cruiseH) * Math.min(dt * 1.6, 1);
+          camera.position.set(o.x + Math.cos(st.cruiseA) * st.cruiseR, st.cruiseH, o.z + Math.sin(st.cruiseA) * st.cruiseR);
+          tmpV.set(o.x, o.look, o.z);
+          camera.lookAt(tmpV);
+          st.yaw = st.tyaw = camera.rotation.y;
+          st.pitch = st.tpitch = camera.rotation.x;
+          st.eyeTarget = st.cruiseH;
         } else {
           // 漫游移动（WASD / 方向键）；视角朝目标指数平滑，滚轮平滑推拉，Q/E 升降
           const damp = 1 - Math.exp(-dt * 22);
@@ -1071,6 +1208,11 @@
             s.mesh.scale.setScalar(1 + 0.35 * p);
           }
         }
+        // 关系电缆能量流：箭头纹理沿管线向目标端滚动
+        for (let i = 0; i < ctx.flowTexs.length; i++) {
+          const f = ctx.flowTexs[i];
+          f.tex.offset.x = (f.tex.offset.x - dt * f.speed) % 1;
+        }
         renderer.render(scene, camera);
       }
     }
@@ -1108,7 +1250,159 @@
         disposeObject(ctx.world);
         ctx.world = buildWorld(ctx);
         scene.add(ctx.world);
+        // 世界重建后设备组引用失效，重建关系连线
+        const lk = ctx.linksKey;
+        ctx.linksKey = "";
+        if (lk) this.setLinks(JSON.parse(lk));
         showHover(null);
+      },
+      // 关系连线叠加：地板电缆 L 形走线（底部出线→地板→目标底部上行），双层管结构——
+      // 深色打底管 + 上层流动箭头纹理；多线按 lane 错开走线层。links=[{from,to,type}]，
+      // type 决定颜色与流速（能量流方向 = from → to）
+      setLinks: function (links) {
+        const key = JSON.stringify(links || []);
+        if (key === ctx.linksKey) return;
+        ctx.linksKey = key;
+        // 旧流动纹理随 linkGroup 一并 dispose（disposeObject 会处理 material.map）
+        ctx.flowTexs = [];
+        if (ctx.linkGroup) {
+          ctx.world.remove(ctx.linkGroup);
+          disposeObject(ctx.linkGroup);
+          ctx.linkGroup = null;
+        }
+        const group = new THREE.Group();
+        const byId = {};
+        ctx.pickables.forEach(function (g) {
+          byId[g.name] = g;
+        });
+        const COLORS = { 供电连接: 0xe5484d, 冗余关系: 0x2fbf71, 制冷影响: 0x0ea5e9, 通信依赖: 0x4b7ae5 };
+        const SPEED = { 供电连接: 0.55, 制冷影响: 0.35, 通信依赖: 0.22, 冗余关系: 0.12 };
+        // 路由：源底部出线 → 垂直到地板 → 沿走线层 L 形横移 → 目标正下方上行入底；
+        // lane 将多条线的走线层在 z 上错开，避免同层重叠
+        function cablePath(a, b, lane) {
+          const sx = a.position.x,
+            sz = a.position.z;
+          const dx = b.position.x,
+            dz = b.position.z;
+          const cz = (sz + dz) / 2 + 0.22 + (lane % 4) * 0.17;
+          return [
+            new THREE.Vector3(sx, 0.35, sz),
+            new THREE.Vector3(sx, 0.06, cz),
+            new THREE.Vector3(dx, 0.06, cz),
+            new THREE.Vector3(dx, 0.35, dz),
+          ];
+        }
+        let built = 0;
+        (links || []).forEach(function (l) {
+          const a = byId[l.from],
+            b = byId[l.to];
+          if (!a || !b) return;
+          const color = COLORS[l.type] || 0x8b93a1;
+          const speed = SPEED[l.type] != null ? SPEED[l.type] : 0.2;
+          const curve = new THREE.CatmullRomCurve3(cablePath(a, b, built), false, "catmullrom", 0);
+          built++;
+          const len = curve.getLength();
+          const segs = Math.max(16, Math.min(160, Math.round(len * 6)));
+          // 打底管：线槽电缆轮廓——按关系类型加深染色，管身颜色即可区分类型
+          const baseColor = new THREE.Color(color).multiplyScalar(0.5);
+          const base = new THREE.Mesh(
+            new THREE.TubeGeometry(curve, segs, 0.062, 6, false),
+            new THREE.MeshBasicMaterial({ color: baseColor })
+          );
+          group.add(base);
+          // 上层流动箭头管：细密 chevron（每 0.55m 一节）白色高亮，压在类型色管身上
+          const tex = makeFlowTexture();
+          tex.repeat.set(Math.max(len / 0.55, 1), 1);
+          ctx.flowTexs.push({ tex: tex, speed: speed });
+          const tube = new THREE.Mesh(
+            new THREE.TubeGeometry(curve, segs, 0.042, 6, false),
+            new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff, transparent: true, alphaTest: 0.05 })
+          );
+          group.add(tube);
+          // 目标端小圆锥箭头：贴打底管末端上方，指向流入方向（沿末端切线向上）
+          const tan = curve.getTangent(1).normalize();
+          const cone = new THREE.Mesh(
+            new THREE.ConeGeometry(0.09, 0.22, 8),
+            new THREE.MeshBasicMaterial({ color: color })
+          );
+          cone.position.copy(curve.getPoint(1)).addScaledVector(tan, -0.14);
+          cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tan);
+          group.add(cone);
+        });
+        ctx.linkGroup = group;
+        ctx.world.add(group);
+      },
+      /* ---------- 相机操控中心 API ---------- */
+      // 屏幕方向 → 地面投影：普通视角按前后左右，俯视视角按屏幕上下平移
+      groundAxes: function () {
+        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion),
+          up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+        right.y = 0;
+        up.y = 0;
+        if (right.lengthSq() < 1e-6) right.set(1, 0, 0);
+        right.normalize();
+        if (up.lengthSq() < 1e-6) up.crossVectors(UP, right);
+        up.normalize();
+        return { right: right, up: up };
+      },
+      nudge: function (fwd, right) {
+        st.cruise = false;
+        st.tween = null;
+        const ax = this.groundAxes();
+        camera.position.addScaledVector(ax.up, fwd * 1.6).addScaledVector(ax.right, right * 1.6);
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -WORLD_LIMIT, WORLD_LIMIT);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -WORLD_LIMIT, WORLD_LIMIT);
+      },
+      dolly: function (dir) {
+        st.cruise = false;
+        st.tween = null;
+        camera.getWorldDirection(tmpF); // 指向当前观察目标
+        if (Math.abs(tmpF.y) > 0.8) {
+          // 俯视/仰视拓扑：沿垂直轴升降，放大 = 降低拉近
+          camera.position.y = THREE.MathUtils.clamp(camera.position.y - dir * 2.2, 1.4, 42);
+          st.eyeTarget = camera.position.y;
+          return;
+        }
+        if (Math.abs(tmpF.y) > 0.15) {
+          // 等轴/斜视：沿视线方向做 3D 推拉，瞄向目标点（X/Y/Z 同时移动）
+          camera.position.addScaledVector(tmpF, dir * 2.2);
+          camera.position.y = THREE.MathUtils.clamp(camera.position.y, 0.8, 42);
+          st.eyeTarget = camera.position.y;
+        } else {
+          // 正视横剖：沿水平视线推拉，保持剖面高度不变
+          tmpF.y = 0;
+          tmpF.normalize();
+          camera.position.addScaledVector(tmpF, dir * 2.2);
+        }
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -WORLD_LIMIT, WORLD_LIMIT);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -WORLD_LIMIT, WORLD_LIMIT);
+      },
+      home: function () {
+        teleport(st.lastSite || "all");
+      },
+      setView: function (mode) {
+        st.cruise = false;
+        const idx = ctx.sites.indexOf(st.lastSite || "");
+        const oi = idx < 0 ? 1 : ctx.siteOrder ? Math.max(0, ctx.siteOrder.indexOf(st.lastSite)) : idx;
+        const cx = HALL_X[oi] != null ? HALL_X[oi] : oi * 40;
+        if (mode === "top") {
+          flyTo(new THREE.Vector3(cx, 18, 0), new THREE.Vector3(cx, 0, 0), null);
+          st.eyeTarget = 18;
+        } else if (mode === "front") {
+          flyTo(new THREE.Vector3(cx, 1.5, -10), new THREE.Vector3(cx, 1.4, 0), null);
+          st.eyeTarget = 1.5;
+        } else {
+          // iso 标准等轴
+          flyTo(new THREE.Vector3(cx + 15, 13, -15), new THREE.Vector3(cx, 1.2, 0), null);
+          st.eyeTarget = 13;
+        }
+      },
+      setCruise: function (on) {
+        st.cruise = !!on;
+        if (on) st.cruiseA = null; // 下次帧循环从当前位置平滑进入轨道
+      },
+      _debugCam: function () {
+        return { pos: [camera.position.x, camera.position.y, camera.position.z], cruise: !!st.cruise, cruiseA: st.cruiseA == null ? null : +st.cruiseA.toFixed(3), tween: !!st.tween, inView: !!st.inView, lastSite: st.lastSite || null };
       },
       _el: root,
     };

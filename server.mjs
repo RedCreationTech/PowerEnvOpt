@@ -122,6 +122,7 @@ export function createAppServer({
         res.writeHead(200, {
           "Content-Type": types[path.extname(asset)],
           "Content-Length": data.length,
+          "Cache-Control": "no-cache",
         });
         res.end(req.method === "HEAD" ? undefined : data);
         return;

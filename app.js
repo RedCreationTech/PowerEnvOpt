@@ -23,30 +23,43 @@ const TYPES = [
   "柴油发电机",
 ];
 const SEED = () => ({
-  schema: 1,
+  schema: 2,
   tick: 0,
-  devices: Array.from({ length: 36 }, (_, i) => ({
-    id: `HC-${["BJ", "SH", "SZ"][Math.floor(i / 12)]}-${String((i % 12) + 1).padStart(3, "0")}`,
-    name: `${TYPES[i % 6]} ${String(Math.floor((i % 12) / 6) + 1).padStart(2, "0")}`,
-    type: TYPES[i % 6],
-    site: SITES[Math.floor(i / 12)],
-    room: i % 12 < 6 ? "A 区动力机房" : "B 区动力机房",
-    model: [
-      "HC-UPS40",
-      "HC-BAT192",
-      "HC-PAC30",
-      "HC-PDU400",
-      "HC-TH01",
-      "HC-DG200",
-    ][i % 6],
-    temp: Math.round((23 + (i % 7) * 1.4 + (i === 0 ? 10 : 0)) * 10) / 10,
-    load: 48 + ((i * 7) % 36),
-    health: i === 0 ? 76 : 90 + (i % 9),
-    quality:
-      i === 4 ? "迟到" : i === 16 ? "缺失" : i === 29 ? "时钟漂移" : "有效",
-    online: i !== 16,
-    points: 8,
-  })),
+  devices: (() => {
+    const ds = Array.from({ length: 36 }, (_, i) => ({
+      id: `HC-${["BJ", "SH", "SZ"][Math.floor(i / 12)]}-${String((i % 12) + 1).padStart(3, "0")}`,
+      name: `${TYPES[i % 6]} ${String(Math.floor((i % 12) / 6) + 1).padStart(2, "0")}`,
+      type: TYPES[i % 6],
+      site: SITES[Math.floor(i / 12)],
+      room: i % 12 < 6 ? "A 区动力机房" : "B 区动力机房",
+      model: [
+        "HC-UPS40",
+        "HC-BAT192",
+        "HC-PAC30",
+        "HC-PDU400",
+        "HC-TH01",
+        "HC-DG200",
+      ][i % 6],
+      temp: Math.round((23 + (i % 7) * 1.4 + (i === 0 ? 10 : 0)) * 10) / 10,
+      load: 48 + ((i * 7) % 36),
+      health: i === 0 ? 76 : 90 + (i % 9),
+      quality:
+        i === 4 ? "迟到" : i === 16 ? "缺失" : i === 29 ? "时钟漂移" : "有效",
+      online: i !== 16,
+      points: 8,
+    }));
+    // 站点规模差异化（总量保持 36）：深圳 3 台设备调拨到上海张江
+    const mv = (id, room, name) => {
+      const d = ds.find((x) => x.id === id);
+      d.site = SITES[1];
+      d.room = room;
+      d.name = name;
+    };
+    mv("HC-SZ-007", "A 区动力机房", "UPS 03");
+    mv("HC-SZ-008", "A 区动力机房", "蓄电池组 03");
+    mv("HC-SZ-011", "B 区动力机房", "温湿度传感器 03");
+    return ds;
+  })(),
   alarms: Array.from({ length: 18 }, (_, i) => ({
     id: `AL-20261017-${String(i + 1).padStart(3, "0")}`,
     device: `HC-${["BJ", "SH", "SZ"][Math.floor(i / 6)]}-${String((i % 6) + 1).padStart(3, "0")}`,
@@ -99,6 +112,7 @@ const SEED = () => ({
   audits: [],
   topologyVersion: 1,
   links: [],
+  site: "all",
   config: {
     protocol: "Modbus TCP",
     interval: "60",
@@ -116,7 +130,7 @@ try {
 }
 if (
   !state ||
-  state.schema !== 1 ||
+  state.schema !== 2 ||
   !Array.isArray(state.devices) ||
   state.devices.length !== 36 ||
   !Array.isArray(state.alarms) ||
@@ -133,8 +147,9 @@ if (
   !state.alarms.every((a) => a && state.devices.some((d) => d.id === a.device))
 )
   state = SEED();
+if (state.site !== "all" && !SITES.includes(state.site)) state.site = "all";
 let page = "overview",
-  site = "all",
+  site = state.site || "all",
   query = "",
   filter = "全部",
   pageNo = 1,
@@ -345,7 +360,7 @@ const views = {
   overview() {
     const ds = filteredDevices(),
       aa = filteredAlarms().filter((a) => a.status !== "已关闭");
-    return `<div class="kpis">${kpi("接入设备", ds.length, "台", '<span class="green">●</span> ' + ds.filter((d) => d.online).length + " 台在线 · " + ds.length * 8 + " 个模拟测点", "", "▦")}${kpi("待处置告警", aa.filter((a) => a.status === "待确认").length, "条", '<span class="red">●</span> ' + aa.filter((a) => a.severity === "紧急").length + " 条紧急 · 点击下方查看", "orange", "♧")}${kpi("设备健康指数", Math.round(ds.reduce((s, d) => s + d.health, 0) / ds.length), "/ 100", '<span class="blue">◇</span> 场景分数，不代表模型预测精度', "blue", "♡")}${kpi("演示日累计能耗", energyTotal().toLocaleString("zh-CN", { maximumFractionDigits: 1 }), "kWh", '<span class="green">◌</span> 合成场景 · 非真实电表读数', "", "ϟ")}</div><div class="grid two"><section class="card">${head("运行趋势", `<div class="legend"><span><i style="background:#4b7ae5"></i>UPS 温度</span><span><i style="background:#79cbb9"></i>环境温度</span><span>最近 2 小时 · °C</span></div>`)}${chart("temp", false, filteredDevices()[0])}<div class="metric-note">固定场景曲线 · 手动推进时钟可查看下一步模拟值</div></section><section class="card">${head("站点运行概况", '<span class="subtext">3 个演示站点</span>')}${SITES.map((s, i) => `<div class="site-row"><div class="site-icon">▥</div><div class="site-copy"><b>${s}</b><small>12 台设备 · 96 个测点</small></div>${badge(i === 1 ? "监测缺口" : "正常")}${button("进入", `selectSite('${s}')`)}</div>`).join("")}<div class="callout"><span class="spark">✧</span><div><b style="font-size:12px">以数据质量约束预测</b><p>${ds.filter((d) => d.quality !== "有效").length} 处质量问题已标记，异常数据不静默填补。</p><button class="link" onclick="navigate('quality')">查看数据质量 →</button></div></div></section></div><div class="grid two"><section class="card">${head("需要关注的告警", `<button class="link" onclick="navigate('alarms')">全部告警 →</button>`)}${table(["等级", "告警内容", "关联设备", "状态", "发生时间", "操作"], alarmRows(aa.slice(0, 4)))}</section><section class="card">${head("预测性维护关注", '<span class="badge warn">模拟风险</span>')}<div class="risk-card"><div class="risk-ring"><span>${ds[0].health}</span></div><div class="risk-copy"><b>${ds[0].name} · 趋势关注</b><p>${ds[0].id} / A 区动力机房</p>${badge("未来 60 分钟")}</div></div><div class="split-note">温度呈上行趋势，建议人工核查通风、风机与负载。不能据此判定电池故障。</div><button class="primary" onclick="selectedDevice='${ds[0].id}';navigate('health')">查看预测证据 →</button></section></div>`;
+    return `<div class="kpis">${kpi("接入设备", ds.length, "台", '<span class="green">●</span> ' + ds.filter((d) => d.online).length + " 台在线 · " + ds.length * 8 + " 个模拟测点", "", "▦")}${kpi("待处置告警", aa.filter((a) => a.status === "待确认").length, "条", '<span class="red">●</span> ' + aa.filter((a) => a.severity === "紧急").length + " 条紧急 · 点击下方查看", "orange", "♧")}${kpi("设备健康指数", Math.round(ds.reduce((s, d) => s + d.health, 0) / ds.length), "/ 100", '<span class="blue">◇</span> 场景分数，不代表模型预测精度', "blue", "♡")}${kpi("演示日累计能耗", energyTotal().toLocaleString("zh-CN", { maximumFractionDigits: 1 }), "kWh", '<span class="green">◌</span> 合成场景 · 非真实电表读数', "", "ϟ")}</div><div class="grid two"><section class="card">${head("运行趋势", `<div class="legend"><span><i style="background:#4b7ae5"></i>UPS 温度</span><span><i style="background:#79cbb9"></i>环境温度</span><span>最近 2 小时 · °C</span></div>`)}${chart("temp", false, filteredDevices()[0])}<div class="metric-note">固定场景曲线 · 手动推进时钟可查看下一步模拟值</div></section><section class="card">${head("站点运行概况", '<span class="subtext">3 个演示站点</span>')}${SITES.map((s, i) => { const n = state.devices.filter((d) => d.site === s).length; return `<div class="site-row"><div class="site-icon">▥</div><div class="site-copy"><b>${s}</b><small>${n} 台设备 · ${n * 8} 个测点</small></div>${badge(i === 1 ? "监测缺口" : "正常")}${button("进入", `selectSite('${s}')`)}</div>`; }).join("")}<div class="callout"><span class="spark">✧</span><div><b style="font-size:12px">以数据质量约束预测</b><p>${ds.filter((d) => d.quality !== "有效").length} 处质量问题已标记，异常数据不静默填补。</p><button class="link" onclick="navigate('quality')">查看数据质量 →</button></div></div></section></div><div class="grid two"><section class="card">${head("需要关注的告警", `<button class="link" onclick="navigate('alarms')">全部告警 →</button>`)}${table(["等级", "告警内容", "关联设备", "状态", "发生时间", "操作"], alarmRows(aa.slice(0, 4)))}</section><section class="card">${head("预测性维护关注", '<span class="badge warn">模拟风险</span>')}<div class="risk-card"><div class="risk-ring"><span>${ds[0].health}</span></div><div class="risk-copy"><b>${ds[0].name} · 趋势关注</b><p>${ds[0].id} / A 区动力机房</p>${badge("未来 60 分钟")}</div></div><div class="split-note">温度呈上行趋势，建议人工核查通风、风机与负载。不能据此判定电池故障。</div><button class="primary" onclick="selectedDevice='${ds[0].id}';navigate('health')">查看预测证据 →</button></section></div>`;
   },
   assets() {
     const rows = filteredDevices().filter(
@@ -356,15 +371,10 @@ const views = {
         (filter === "全部" || d.type === filter),
     );
     const p = paginate(rows);
-    return `<div class="card" style="margin-bottom:20px">${head("供电与环境关系", `<span class="subtext">拓扑 v${state.topologyVersion} · 示意关系</span>`)}<div class="topology"><button class="node" onclick="topologyNode('市电输入')">市电输入<small>400 V / 50 Hz · 演示</small></button><button class="node" onclick="topologyNode('配电母线')">配电母线<small>供电关系 → UPS</small></button><button class="node" onclick="topologyNode('柴油发电机')">柴油发电机<small>冗余关系 · 备用电源</small></button><div class="flowline">↓ 供电连接　　↔ 冗余关系　　⇢ 制冷影响</div>${filteredDevices()
-      .slice(0, 3)
-      .map(
-        (d) =>
-          `<button class="node" onclick="assetDetail('${d.id}')">${d.name}<small>${d.id}</small>${badge(d.quality === "有效" ? "正常" : d.quality)}</button>`,
-      )
-      .join(
-        "",
-      )}</div><p>${state.links.map((l) => `${esc(l.from)} → ${esc(l.to)}（${esc(l.type)}）`).join("<br>")}</p><div class="toolbar" style="margin-top:16px;margin-bottom:0"><button onclick="editTopology()">编辑演示关系</button><button onclick="modal('拓扑版本', '<p>初始版本 v1；当前 v'+state.topologyVersion+'</p><p>本地新增关系：'+esc(JSON.stringify(state.links))+'</p>')">版本记录</button></div></div><div class="card">${head("资产目录", '<span class="subtext">资产 ID 跨页面一致</span>')}${toolbar("搜索设备 ID、名称或型号", ["全部", ...TYPES])}${table(
+    const topo = topoEdges(),
+      nDef = topo.filter((e) => e.def).length,
+      nUser = topo.filter((e) => e.user).length;
+    return `<div class="card" style="margin-bottom:20px">${head("供电与环境关系", `<span class="subtext">拓扑 v${state.topologyVersion} · CAD 示意 · ${nDef + nUser} 条关系 · 筛选：${esc(twinRel)}</span>`)}<div class="topo-wrap">${topologySvg()}<div class="topo-legend">${topoLegend()}</div></div><p class="topo-summary">关系筛选（与 3D 关系叠加联动）：<b>${esc(twinRel)}</b> ｜ 默认关系 ${nDef} 条（按房间推导）· 本地新增 ${nUser} 条 ｜ 箭头方向 = 上游 → 下游 ｜ 供电与冗余仅表示依赖关系，不包含任何控制指令。点击图例可切换筛选。</p><div class="toolbar" style="margin-top:12px;margin-bottom:0"><button onclick="editTopology()">编辑演示关系</button><button onclick="modal('拓扑版本', '<p>初始版本 v1；当前 v'+state.topologyVersion+'</p><p>本地新增关系：'+esc(JSON.stringify(state.links))+'</p>')">版本记录</button></div></div><div class="card">${head("资产目录", '<span class="subtext">资产 ID 跨页面一致</span>')}${toolbar("搜索设备 ID、名称或型号", ["全部", ...TYPES])}${table(
       ["设备 / ID", "型号", "站点 / 机房", "状态", "测点", "操作"],
       p.rows.map(
         (d) =>
@@ -483,10 +493,18 @@ const WORK_STATES = [
   "待审核",
   "已关闭",
 ];
-function selectSite(s) {
+function setSite(s) {
+  if (s !== "all" && !SITES.includes(s)) return;
   site = s;
-  $("#site").value = s;
+  state.site = s;
+  const sel = $("#site");
+  if (sel && sel.value !== s) sel.value = s;
+  pageNo = 1;
+  save();
   render();
+}
+function selectSite(s) {
+  setSite(s);
 }
 function points(d) {
   const bad = d.quality !== "有效";
@@ -581,6 +599,206 @@ function topologyNode(name) {
   modal(
     name,
     `<p>拓扑示意节点：${esc(name)}。供电与冗余仅表示依赖关系，不包含任何控制指令。</p>`,
+  );
+}
+/* —————— CAD 线稿风格拓扑（单线图：上游 → 下游，按房间推导默认关系） —————— */
+const TOPO_STYLE = {
+  供电连接: { color: "#e5484d", dash: "", cls: "tp-pow" },
+  冗余关系: { color: "#2fbf71", dash: ' stroke-dasharray="8 5"', cls: "tp-red" },
+  制冷影响: { color: "#0ea5e9", dash: ' stroke-dasharray="3 4"', cls: "tp-cool" },
+  通信依赖: { color: "#4b7ae5", dash: ' stroke-dasharray="1.5 4.5"', cls: "tp-com" },
+};
+const TOPO_GLYPH = {
+  市电输入: ["市", "#fef2f2", "#b91c1c"],
+  配电柜: ["配", "#eef2ff", "#4f46e5"],
+  UPS: ["U", "#fff7ed", "#c2410c"],
+  蓄电池组: ["蓄", "#ecfdf5", "#047857"],
+  精密空调: ["冷", "#ecfeff", "#0e7490"],
+  温湿度传感器: ["温", "#f0f9ff", "#0369a1"],
+  柴油发电机: ["油", "#f5f5f4", "#57534e"],
+  监控中心: ["监", "#f5f3ff", "#6d28d9"],
+};
+function topoEdges() {
+  const devs = filteredDevices(),
+    edges = [];
+  const groups = {};
+  devs.forEach((d) => {
+    const k = d.site + "|" + ((d.room || "").indexOf("B") >= 0 ? "B" : "A");
+    (groups[k] = groups[k] || {})[d.type] = (groups[k][d.type] || []).concat(d);
+  });
+  const at = (g, t) => g[t] || [];
+  Object.entries(groups).forEach(([k, g]) => {
+    const pdu = at(g, "配电柜")[0],
+      dgs = at(g, "柴油发电机"),
+      ups = at(g, "UPS"),
+      bats = at(g, "蓄电池组"),
+      acs = at(g, "精密空调"),
+      ths = at(g, "温湿度传感器");
+    if (!pdu) return;
+    dgs.forEach((d) => edges.push({ from: d.id, to: pdu.id, type: "冗余关系", def: true }));
+    ups.forEach((u) => edges.push({ from: pdu.id, to: u.id, type: "供电连接", def: true }));
+    acs.forEach((a) => edges.push({ from: pdu.id, to: a.id, type: "供电连接", def: true }));
+    ups.forEach((u, i) => {
+      const b = bats.length ? bats[i % bats.length] : null;
+      if (b) edges.push({ from: b.id, to: u.id, type: "供电连接", def: true });
+    });
+    acs.forEach((a, i) => {
+      const t = ths.length ? ths[i % ths.length] : null;
+      if (t) edges.push({ from: a.id, to: t.id, type: "制冷影响", def: true });
+    });
+    // 监控中心（外接虚拟源）→ 温湿度传感器：通信依赖
+    ths.forEach((t) => edges.push({ from: "监控中心@" + k, to: t.id, type: "通信依赖", def: true }));
+  });
+  SITES.forEach((s) => {
+    if (site !== "all" && s !== site) return;
+    devs
+      .filter((d) => d.site === s && d.type === "配电柜")
+      .forEach((p) => edges.push({ from: "市电输入@" + s, to: p.id, type: "供电连接", def: true }));
+  });
+  const all = edges.concat(state.links.map((l) => ({ ...l, user: true })));
+  // 与 3D「关系叠加」筛选联动：全部类型或按类型过滤
+  return twinRel !== "全部" ? all.filter((e) => e.type === twinRel) : all;
+}
+function topologySvg() {
+  const sitesShown = site === "all" ? SITES : [site],
+    devs = filteredDevices(),
+    NW = 162,
+    NH = 48,
+    XS = [178, 366, 554, 742, 930, 1118],
+    roomH = 150,
+    siteH = 26 + roomH * 2 + 14,
+    W = 1300,
+    H = 14 + sitesShown.length * siteH + 6;
+  const nodes = {};
+  let bands = "",
+    labels = "";
+  const put = (d, x, y) => {
+    if (d)
+      nodes[d.id] = { x, y, w: NW, h: NH, name: d.name, sub: d.id, type: d.type, devId: d.id, alarm: !!state.alarms.find((a) => a.device === d.id && a.status !== "已关闭"), online: d.online };
+  };
+  sitesShown.forEach((s, si) => {
+    const siteY = 14 + si * siteH;
+    bands += `<rect class="tp-band" x="8" y="${siteY}" width="${W - 16}" height="${siteH - 10}" rx="6"/>`;
+    bands += `<text class="tp-site" x="20" y="${siteY + 18}">${esc(s)}</text>`;
+    ["A", "B"].forEach((rm, ri) => {
+      const rowY = siteY + 26 + ri * roomH,
+        rk = s + "|" + rm;
+      const roomDevs = devs.filter(
+        (d) => d.site === s && ((d.room || "").indexOf("B") >= 0 ? "B" : "A") === rm,
+      );
+      const byT = {};
+      roomDevs.forEach((d) => {
+        (byT[d.type] = byT[d.type] || []).push(d);
+      });
+      // 上排：配电柜 → UPS×n → 蓄电池组×n；下排：柴油发电机 → 精密空调×n → 监控中心 → 温湿度传感器×n
+      [...(byT["配电柜"] || []), ...(byT["UPS"] || []), ...(byT["蓄电池组"] || [])].forEach(
+        (d, i) => put(d, XS[Math.min(i, XS.length - 1)], rowY + 16),
+      );
+      const botSeq = [...(byT["柴油发电机"] || []), ...(byT["精密空调"] || [])];
+      botSeq.forEach((d, i) => put(d, XS[i], rowY + 84));
+      const ths = byT["温湿度传感器"] || [];
+      if (ths.length) {
+        nodes["监控中心@" + rk] = { x: XS[botSeq.length], y: rowY + 84, w: NW, h: NH, name: "监控中心", sub: "外接 · 演示", type: "监控中心", virtual: true };
+        ths.forEach((d, i) => put(d, XS[Math.min(botSeq.length + 1 + i, XS.length - 1)], rowY + 84));
+      }
+      labels += `<text class="tp-room" x="1290" y="${rowY + 40}" text-anchor="end">${rm} 区动力机房 · ${roomDevs.length} 台</text>`;
+      if (ri === 0)
+        nodes["市电输入@" + s] = { x: 14, y: rowY + 16, w: NW, h: NH, name: "市电输入", sub: "400 V / 50 Hz · 演示", type: "市电输入", virtual: true };
+    });
+  });
+  const byKey = nodes;
+  let laneN = 0;
+  function edgeD(e) {
+    const a = byKey[e.from],
+      b = byKey[e.to];
+    if (!a || !b) return "";
+    const acx = a.x + a.w / 2,
+      acy = a.y + a.h / 2,
+      bcx = b.x + b.w / 2,
+      bcy = b.y + b.h / 2;
+    // 市电输入/跨行虚拟源：母线槽下引
+    if (a.virtual && a.y !== b.y) return `M ${acx} ${a.y + a.h} V ${bcy} H ${b.x}`;
+    if (a.y === b.y) {
+      const fwd = a.x < b.x,
+        gap = fwd ? b.x - (a.x + a.w) : a.x - (b.x + b.w);
+      if (gap > 40) {
+        // 同排但被中间设备阻挡：走本排外侧的并行 lane（最多 3 条）
+        const topRow = a.y % siteH < 76,
+          laneY = topRow ? a.y - 12 - (laneN++ % 3) * 7 : a.y + a.h + 12 + (laneN++ % 3) * 7;
+        return fwd
+          ? `M ${a.x + a.w} ${acy} H ${a.x + a.w + 13} V ${laneY} H ${bcx} V ${bcy} H ${b.x}`
+          : `M ${a.x} ${acy} H ${a.x - 13} V ${laneY} H ${bcx} V ${bcy} H ${b.x + b.w}`;
+      }
+      return fwd ? `M ${a.x + a.w} ${acy} H ${b.x}` : `M ${a.x} ${acy} H ${b.x + b.w}`;
+    }
+    if (Math.abs(acx - bcx) < 4)
+      return a.y < b.y
+        ? `M ${acx} ${a.y + a.h} V ${b.y}`
+        : `M ${acx} ${a.y} V ${b.y + b.h}`;
+    if (b.y - (a.y + a.h) <= 24 && a.y < b.y) {
+      const mid = (a.y + a.h + b.y) / 2;
+      return `M ${acx} ${a.y + a.h} V ${mid} H ${bcx} V ${b.y}`;
+    }
+    if (a.y - (b.y + b.h) <= 24 && b.y < a.y) {
+      const mid = (b.y + b.h + a.y) / 2;
+      return `M ${acx} ${a.y} V ${mid} H ${bcx} V ${b.y + b.h}`;
+    }
+    const lift = 34 + Math.min(Math.abs(bcx - acx) * 0.15, 40);
+    return `M ${acx} ${a.y} C ${acx} ${a.y - lift}, ${bcx} ${b.y - lift}, ${bcx} ${b.y}`;
+  }
+  let defs = "",
+    edgesSvg = "",
+    nodesSvg = "";
+  const colors = { 供电连接: "#e5484d", 冗余关系: "#2fbf71", 制冷影响: "#0ea5e9", 通信依赖: "#4b7ae5", 演示新增: "#d946ef" };
+  Object.entries(colors).forEach(([t, c]) => {
+    defs += `<marker id="tpa-${t}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="${c}"/></marker>`;
+  });
+  topoEdges().forEach((e) => {
+    const d = edgeD(e);
+    if (!d) return;
+    const st = TOPO_STYLE[e.type] || TOPO_STYLE["通信依赖"],
+      color = e.user ? colors["演示新增"] : st.color,
+      cls = e.user ? "tp-user" : st.cls,
+      dash = e.user ? ' stroke-dasharray="9 5"' : st.dash;
+    edgesSvg += `<path class="tp-edge ${cls}" d="${d}" fill="none" stroke="${color}" stroke-width="2"${dash} marker-end="url(#tpa-${e.user ? "演示新增" : e.type})"/>`;
+    edgesSvg += `<path class="tp-hit" d="${d}" fill="none" stroke="transparent" stroke-width="14" onclick='topoEdgeInfo(${JSON.stringify(e.from)},${JSON.stringify(e.to)},${JSON.stringify(e.type)},${e.user ? 1 : 0})'/>`;
+  });
+  Object.values(nodes).forEach((n) => {
+    const [glyph, bg, fg] = TOPO_GLYPH[n.type] || ["设", "#f5f5f4", "#57534e"],
+      dot = n.virtual ? "#8b93a1" : n.alarm ? "#e5484d" : n.online ? "#2fbf71" : "#8b93a1",
+      click = n.virtual ? `topologyNode('${n.name}')` : `assetDetail('${n.devId}')`;
+    nodesSvg += `<g class="tp-node" onclick="${click}"><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="3"/><rect class="tp-glyph" x="${n.x + 8}" y="${n.y + 9}" width="26" height="26" rx="4" fill="${bg}"/><text class="tp-glyph-t" x="${n.x + 21}" y="${n.y + 27}" fill="${fg}">${glyph}</text><text class="tp-name" x="${n.x + 42}" y="${n.y + 19}">${esc(n.name)}</text><text class="tp-id" x="${n.x + 42}" y="${n.y + 35}">${esc(n.sub)}</text><circle cx="${n.x + n.w - 12}" cy="${n.y + 13}" r="4" fill="${dot}"/></g>`;
+  });
+  return `<svg class="topo-cad" viewBox="0 0 ${W} ${H}" role="img" aria-label="供电与环境关系示意拓扑">${defs}${bands}${edgesSvg}${labels}${nodesSvg}</svg>`;
+}
+function topoLegend() {
+  const items = [
+    ["全部", "#33415c", ""],
+    ["供电连接", "#e5484d", ""],
+    ["冗余关系", "#2fbf71", 'stroke-dasharray="8 5"'],
+    ["制冷影响", "#0ea5e9", 'stroke-dasharray="3 4"'],
+    ["通信依赖", "#4b7ae5", 'stroke-dasharray="1.5 4.5"'],
+    ["演示新增", "#d946ef", 'stroke-dasharray="9 5"'],
+  ];
+  return items
+    .map(
+      ([t, c, dash]) =>
+        `<button class="tp-leg ${twinRel === t ? "active" : ""}" onclick="twinSetRel('${t}')" title="点击与 3D 关系叠加联动筛选">${t === "全部" ? "" : `<svg width="30" height="8"><line x1="1" y1="4" x2="24" y2="4" stroke="${c}" stroke-width="2"${dash}/><path d="M24,1 L29,4 L24,7 z" fill="${c}"/></svg>`}${t}</button>`,
+    )
+    .join("");
+}
+function topoEdgeInfo(from, to, type, user) {
+  const fn = (id) =>
+    id.indexOf("市电输入@") === 0
+      ? "市电输入（虚拟源）"
+      : id.indexOf("监控中心@") === 0
+        ? "监控中心（外接）"
+        : dev(id)
+        ? dev(id).name + "（" + id + "）"
+        : id;
+  modal(
+    "拓扑关系详情",
+    `<dl><dt>上游</dt><dd>${esc(fn(from))}</dd><dt>下游</dt><dd>${esc(fn(to))}</dd><dt>关系类型</dt><dd>${badge(type)}${user ? ' <span class="subtext">· 本地演示新增</span>' : ""}</dd></dl><p class="split-note">示意关系仅表示依赖方向，不包含任何控制指令；演示新增关系保存在本地，可经「版本记录」查看。</p>`,
   );
 }
 function editTopology() {
@@ -1188,10 +1406,9 @@ function resetDemo() {
   render();
   toast("已恢复初始演示数据");
 }
+if ($("#site") && $("#site").value !== site) $("#site").value = site;
 $("#site").addEventListener("change", (e) => {
-  site = e.target.value;
-  pageNo = 1;
-  render();
+  setSite(e.target.value);
 });
 $("#refresh").addEventListener("click", () => {
   state.tick++;
